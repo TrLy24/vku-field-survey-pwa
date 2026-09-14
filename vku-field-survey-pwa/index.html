@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#6f42c1">
+  <meta name="description" content="VKU Field Survey — khảo sát sinh viên ngoài thực địa, hỗ trợ offline và GPS.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="stylesheet" href="style.css">
+  <title>VKU Field Survey</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">VKU</div>
+        <div>
+          <p class="eyebrow">KHẢO SÁT THỰC ĐỊA</p>
+          <h1>VKU Field Survey</h1>
+        </div>
+      </div>
+      <div class="connection-area">
+        <span id="statusDot" class="status-dot offline" aria-hidden="true"></span>
+        <span id="statusText">Đang kiểm tra kết nối…</span>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <section class="hero-card">
+        <div>
+          <p class="section-kicker">OFFLINE-FIRST</p>
+          <h2>Ghi nhận khảo sát ngay cả khi mất mạng</h2>
+          <p>Dữ liệu được lưu an toàn trên thiết bị trước, sau đó tự đồng bộ lên Google Sheets khi có Internet.</p>
+        </div>
+        <div class="hero-badge">IndexedDB<br>+ GPS<br>+ Drive</div>
+      </section>
+
+      <section class="card" aria-labelledby="survey-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">01 · PHIÊN KHẢO SÁT</p>
+            <h2 id="survey-title">Thông tin khảo sát</h2>
+          </div>
+          <span id="requiredHint" class="muted">* Trường bắt buộc</span>
+        </div>
+
+        <form id="surveyForm" novalidate>
+          <div class="form-grid two-col">
+            <div class="field">
+              <label for="sessionName">Tên phiên khảo sát <span>*</span></label>
+              <input id="sessionName" name="sessionName" required maxlength="120" placeholder="Ví dụ: Khảo sát sinh viên năm 3">
+              <small class="field-error" data-error-for="sessionName"></small>
+            </div>
+            <div class="field">
+              <label for="interviewerName">Người phỏng vấn <span>*</span></label>
+              <input id="interviewerName" name="interviewerName" required maxlength="120" placeholder="Họ và tên người phỏng vấn">
+              <small class="field-error" data-error-for="interviewerName"></small>
+            </div>
+            <div class="field">
+              <label for="sessionTime">Thời gian khảo sát <span>*</span></label>
+              <input id="sessionTime" name="sessionTime" type="datetime-local" required>
+              <small class="field-error" data-error-for="sessionTime"></small>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <div class="section-heading compact">
+            <div>
+              <p class="section-kicker">02 · SINH VIÊN</p>
+              <h3>Thông tin người được khảo sát</h3>
+            </div>
+          </div>
+
+          <div class="form-grid two-col">
+            <div class="field">
+              <label for="studentName">Tên sinh viên <span>*</span></label>
+              <input id="studentName" name="studentName" required maxlength="120" autocomplete="name">
+              <small class="field-error" data-error-for="studentName"></small>
+            </div>
+            <div class="field">
+              <label for="studentClass">Lớp / Khoa <span>*</span></label>
+              <input id="studentClass" name="studentClass" required maxlength="120" placeholder="Ví dụ: 23IT1 · Công nghệ thông tin">
+              <small class="field-error" data-error-for="studentClass"></small>
+            </div>
+            <div class="field">
+              <label for="studentYear">Năm học <span>*</span></label>
+              <select id="studentYear" name="studentYear" required>
+                <option value="">Chọn năm học</option>
+                <option value="Năm 1">Năm 1</option>
+                <option value="Năm 2">Năm 2</option>
+                <option value="Năm 3">Năm 3</option>
+                <option value="Năm 4">Năm 4</option>
+                <option value="Khác">Khác</option>
+              </select>
+              <small class="field-error" data-error-for="studentYear"></small>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <div class="section-heading compact">
+            <div>
+              <p class="section-kicker">03 · NHU CẦU VIỆC LÀM</p>
+              <h3>Thông tin định hướng nghề nghiệp</h3>
+            </div>
+          </div>
+
+          <div class="form-grid one-col">
+            <fieldset class="choice-group">
+              <legend>Đang làm thêm <span>*</span></legend>
+              <div class="choice-grid two">
+                <label class="choice"><input type="radio" name="q_working" value="Có" required><span>Có</span></label>
+                <label class="choice"><input type="radio" name="q_working" value="Không"><span>Không</span></label>
+              </div>
+              <small class="field-error" data-error-for="q_working"></small>
+            </fieldset>
+
+            <fieldset class="choice-group">
+              <legend>Nhu cầu tìm việc <span>*</span></legend>
+              <div class="choice-grid three">
+                <label class="choice"><input type="radio" name="q_needJob" value="Có, cần tìm ngay" required><span>Cần tìm ngay</span></label>
+                <label class="choice"><input type="radio" name="q_needJob" value="Có, tìm khi phù hợp"><span>Tìm khi phù hợp</span></label>
+                <label class="choice"><input type="radio" name="q_needJob" value="Chưa có nhu cầu"><span>Chưa có nhu cầu</span></label>
+              </div>
+              <small class="field-error" data-error-for="q_needJob"></small>
+            </fieldset>
+
+            <div class="field">
+              <label for="q_industry">Ngành mong muốn <span>*</span></label>
+              <select id="q_industry" name="q_industry" required>
+                <option value="">Chọn ngành / vị trí quan tâm</option>
+                <option value="Phát triển phần mềm">Phát triển phần mềm</option>
+                <option value="Data / AI">Data / AI</option>
+                <option value="An toàn thông tin">An toàn thông tin</option>
+                <option value="Mạng / Hệ thống">Mạng / Hệ thống</option>
+                <option value="Thiết kế UI/UX">Thiết kế UI/UX</option>
+                <option value="Digital Marketing">Digital Marketing</option>
+                <option value="Kinh doanh / Bán hàng">Kinh doanh / Bán hàng</option>
+                <option value="Khác">Khác</option>
+              </select>
+              <small class="field-error" data-error-for="q_industry"></small>
+            </div>
+
+            <div class="field">
+              <label for="q_salary">Mức lương mong muốn <span>*</span></label>
+              <select id="q_salary" name="q_salary" required>
+                <option value="">Chọn mức lương</option>
+                <option value="Dưới 3 triệu">Dưới 3 triệu</option>
+                <option value="3 - dưới 5 triệu">3 - dưới 5 triệu</option>
+                <option value="5 - dưới 8 triệu">5 - dưới 8 triệu</option>
+                <option value="8 - dưới 12 triệu">8 - dưới 12 triệu</option>
+                <option value="Từ 12 triệu trở lên">Từ 12 triệu trở lên</option>
+                <option value="Chưa xác định">Chưa xác định</option>
+              </select>
+              <small class="field-error" data-error-for="q_salary"></small>
+            </div>
+
+            <div class="field">
+              <label for="q_skillGap">Kỹ năng còn thiếu</label>
+              <textarea id="q_skillGap" name="q_skillGap" maxlength="1000" rows="3" placeholder="Ví dụ: giao tiếp, phỏng vấn, Git, tiếng Anh…"></textarea>
+            </div>
+
+            <div class="field">
+              <label for="q_support">Đề xuất hỗ trợ</label>
+              <textarea id="q_support" name="q_support" maxlength="1000" rows="3" placeholder="Sinh viên mong muốn VKU / doanh nghiệp hỗ trợ gì?"></textarea>
+            </div>
+
+            <div class="field">
+              <label for="q_note">Ghi chú</label>
+              <textarea id="q_note" name="q_note" maxlength="1500" rows="3" placeholder="Thông tin bổ sung…"></textarea>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <div class="section-heading compact">
+            <div>
+              <p class="section-kicker">04 · HIỆN TRƯỜNG</p>
+              <h3>GPS và ảnh khảo sát</h3>
+            </div>
+          </div>
+
+          <div class="location-card">
+            <div class="location-copy">
+              <div class="icon-box">⌖</div>
+              <div>
+                <strong>Vị trí hiện tại</strong>
+                <p id="locationStatus" class="muted">Chưa lấy vị trí.</p>
+              </div>
+            </div>
+            <button id="getLocationBtn" type="button" class="btn btn-secondary">Lấy vị trí hiện tại</button>
+          </div>
+          <input id="latitude" name="latitude" type="hidden">
+          <input id="longitude" name="longitude" type="hidden">
+          <a id="mapsLink" class="maps-link" href="#" target="_blank" rel="noopener" hidden>Mở vị trí trên Google Maps ↗</a>
+          <small class="field-error block-error" data-error-for="location"></small>
+
+          <div class="photo-card">
+            <div class="photo-heading">
+              <div>
+                <strong>Ảnh hiện trường <span>*</span></strong>
+                <p class="muted">Ảnh sẽ được nén trước khi lưu và đồng bộ.</p>
+              </div>
+              <span id="photoStatus" class="photo-status">Chưa có ảnh</span>
+            </div>
+            <div class="photo-actions">
+              <button id="takePhotoBtn" type="button" class="btn btn-secondary">Chụp / chọn ảnh</button>
+              <input id="photoInput" type="file" accept="image/*" capture="environment" hidden>
+            </div>
+            <img id="photoPreview" class="photo-preview" alt="Ảnh xem trước" hidden>
+            <small class="field-error block-error" data-error-for="photo"></small>
+          </div>
+
+          <div class="submit-area">
+            <div class="submit-copy">
+              <strong>Dữ liệu được lưu trước, đồng bộ sau.</strong>
+              <span>Không có Internet vẫn có thể gửi khảo sát.</span>
+            </div>
+            <div class="action-row">
+              <button id="resetBtn" type="button" class="btn btn-ghost">Xóa biểu mẫu</button>
+              <button id="submitBtn" type="submit" class="btn btn-primary">Gửi phiên khảo sát</button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <section class="card" aria-labelledby="sync-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">05 · ĐỒNG BỘ</p>
+            <h2 id="sync-title">Phiên đã lưu trên máy</h2>
+          </div>
+          <button id="syncNowBtn" type="button" class="btn btn-small btn-secondary" hidden>Đồng bộ ngay</button>
+        </div>
+        <div class="stats-grid">
+          <div class="stat"><span id="syncedCount">0</span><small>Đã đồng bộ</small></div>
+          <div class="stat"><span id="pendingCount">0</span><small>Chờ đồng bộ</small></div>
+          <div class="stat"><span id="errorCount">0</span><small>Lỗi</small></div>
+        </div>
+        <div class="list-toolbar">
+          <p id="pendingBadge" class="pending-badge" hidden></p>
+          <button id="exportBtn" type="button" class="btn btn-ghost btn-small">Xuất JSON</button>
+        </div>
+        <div id="sessionList" class="session-list" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>VKU Field Survey</span>
+      <span>Offline-first · IndexedDB · Google Sheets</span>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="detailModal" class="modal-backdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+      <div class="modal-header">
+        <h3 id="detailTitle">Chi tiết phiên khảo sát</h3>
+        <button id="closeModalBtn" type="button" class="icon-button" aria-label="Đóng">×</button>
+      </div>
+      <div id="detailContent" class="detail-content"></div>
+      <div class="modal-actions">
+        <button id="deleteDetailBtn" type="button" class="btn btn-danger">Xóa khỏi máy</button>
+        <button id="retryDetailBtn" type="button" class="btn btn-secondary" hidden>Thử đồng bộ lại</button>
+        <button id="closeModalBtn2" type="button" class="btn btn-ghost">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
