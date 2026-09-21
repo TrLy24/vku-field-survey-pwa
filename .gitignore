@@ -1,0 +1,16 @@
+node_modules/
+
+www/
+
+.gradle/
+android/.gradle/
+android/local.properties
+android/**/build/
+android/**/captures/
+android/**/.cxx/
+
+.idea/
+*.iml
+
+*.jks
+*.keystore

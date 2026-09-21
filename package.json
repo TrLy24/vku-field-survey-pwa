@@ -1,0 +1,28 @@
+{
+  "name": "vku-field-survey-pwa",
+  "version": "1.0.0",
+  "description": "<<<<<<< HEAD\r # VKU Field Survey PWA",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TrLy24/vku-field-survey-pwa.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/TrLy24/vku-field-survey-pwa/issues"
+  },
+  "homepage": "https://github.com/TrLy24/vku-field-survey-pwa#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/camera": "^8.2.4",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/filesystem": "^8.1.3"
+  }
+}
