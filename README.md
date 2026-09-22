@@ -1,164 +1,388 @@
-<<<<<<< HEAD
 # VKU Field Survey PWA
 
-Ứng dụng khảo sát sinh viên VKU ngoài thực địa, thiết kế theo hướng offline-first:
+Ứng dụng khảo sát sinh viên VKU ngoài thực địa, được xây dựng theo hướng **offline-first**, cho phép người dùng nhập thông tin khảo sát, lấy vị trí GPS, chụp ảnh hiện trường và lưu dữ liệu ngay cả khi không có kết nối mạng.
+
+Project được triển khai dưới dạng **Progressive Web App (PWA)** và được đóng gói thành ứng dụng Android bằng **Capacitor**.
+
+## 1. Tổng quan hệ thống
 
 ```text
-Form -> IndexedDB -> Google Apps Script -> Google Sheets + Google Drive
-                    \-> Google Maps link từ GPS
+                    ┌──────────────────┐
+                    │  VKU Field Survey│
+                    │       PWA        │
+                    └────────┬─────────┘
+                             │
+                    ┌────────▼─────────┐
+                    │     IndexedDB     │
+                    │  Offline Storage  │
+                    └────────┬─────────┘
+                             │
+                    Network available
+                             │
+                    ┌────────▼─────────┐
+                    │ Google Apps Script│
+                    │      Web App      │
+                    └───────┬───┬──────┘
+                            │   │
+                  ┌─────────┘   └──────────┐
+                  ▼                        ▼
+           Google Sheets             Google Drive
+              (CSDL)                (Survey Photos)
 ```
 
-## 1. File chính
+### Công nghệ sử dụng
 
-- `index.html`: giao diện khảo sát và quản lý session offline.
-- `style.css`: UI responsive pastel tím/trắng.
-- `app.js`: IndexedDB, draft, GPS, camera, nén ảnh, sync/retry, export và modal detail.
-- `config.js`: chỉ một nơi cấu hình URL Apps Script.
-- `manifest.json`: PWA manifest.
-- `sw.js`: Service Worker cache app shell; không cache request POST/API bên ngoài.
-- `google-apps-script/Code.gs`: backend Google Apps Script.
+* HTML5
+* CSS3
+* JavaScript
+* IndexedDB
+* Progressive Web App (PWA)
+* Service Worker
+* Geolocation API
+* Camera API
+* Google Apps Script
+* Google Sheets
+* Google Drive
+* Google Maps
+* Capacitor
+* Android
 
-## 2. Cấu hình Apps Script
+---
 
-### Bước 1 — Google Sheets
+# 2. Các phiên bản của project
 
-1. Tạo một Google Spreadsheet.
-2. Đặt tên tab dữ liệu là `CSDL` hoặc để Apps Script tự tạo.
-3. Lấy Spreadsheet ID trong URL:
+Project được phát triển theo từng giai đoạn.
+
+### Week 1 — PWA
+
+Branch: main
+Chức năng chính:
+
+* Responsive mobile UI
+* Form khảo sát
+* Lưu dữ liệu offline bằng IndexedDB
+* GPS
+* Chụp ảnh
+* Nén ảnh
+* Đồng bộ dữ liệu khi có mạng
+* Google Sheets
+* Google Drive
+* Google Maps
+* Service Worker
+* GitHub Pages Live Demo
+
+### Week 2 — Android với Capacitor
+
+Branch: text
+capacitor-android
+
+Bổ sung:
+
+* Capacitor Android project
+* Android Studio
+* Android native wrapper
+* Đồng bộ PWA vào Android
+* Build và chạy ứng dụng trên thiết bị/emulator Android
+
+Các commit chính của Week 2:
+
+Việc sử dụng branch riêng giúp giữ lại phiên bản PWA của Week 1 và phân biệt rõ phần phát triển Android của Week 2.
+
+---
+
+# 3. Cấu trúc project
+
+```text
+vku-field-survey-pwa/
+│
+├── index.html
+├── style.css
+├── app.js
+├── config.js
+├── manifest.json
+├── sw.js
+├── package.json
+├── package-lock.json
+├── vite.config.mjs
+│
+├── public/
+│   └── ...
+│
+├── icons/
+│   └── ...
+│
+├── google-apps-script/
+│   └── Code.gs
+│
+└── android/
+    ├── app/
+    ├── gradle/
+    ├── build.gradle
+    ├── settings.gradle
+    └── ...
+```
+
+## 4. File chính
+
+### `index.html`
+
+Giao diện chính của ứng dụng:
+
+* Form khảo sát
+* Quản lý session
+* Hiển thị trạng thái đồng bộ
+* Modal xem chi tiết
+* Các thao tác với session
+
+### `style.css`
+
+Chứa giao diện responsive cho mobile và desktop.
+
+### `app.js`
+
+Xử lý logic chính:
+
+* IndexedDB
+* Draft/session
+* Validate form
+* GPS
+* Camera
+* Image compression
+* Offline queue
+* Sync
+* Retry
+* Export JSON
+* Xóa dữ liệu local
+* Hiển thị chi tiết session
+
+### `config.js`
+
+Chứa cấu hình frontend, đặc biệt là URL Google Apps Script.
+
+Chỉ cần cấu hình URL tại đây:
+
+```javascript
+APPS_SCRIPT_URL: "YOUR_DEPLOYED_WEB_APP_URL"
+```
+
+### `manifest.json`
+
+Khai báo PWA:
+
+* App name
+* Icons
+* Theme
+* Display mode
+* Start URL
+
+### `sw.js`
+
+Service Worker dùng để:
+
+* Cache app shell
+* Hỗ trợ hoạt động offline
+* Cập nhật cache khi phiên bản PWA thay đổi
+
+Service Worker **không cache các request POST/API bên ngoài**.
+
+### `google-apps-script/Code.gs`
+
+Backend Google Apps Script:
+
+* Nhận dữ liệu từ PWA
+* Ghi dữ liệu vào Google Sheets
+* Lưu ảnh vào Google Drive
+* Kiểm tra session trùng
+* Xử lý retry
+* Trả JSON response cho frontend
+
+### `android/`
+
+Android project được tạo bằng Capacitor và có thể mở trực tiếp bằng Android Studio.
+
+---
+
+# 5. Cấu hình Google Sheets
+
+Tạo một Google Spreadsheet.
+
+Đặt tên sheet dữ liệu:
+
+```text
+CSDL
+```
+
+Lấy Spreadsheet ID từ URL:
 
 ```text
 https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit
 ```
 
-### Bước 2 — Apps Script
+Trong:
 
-1. Mở `Extensions -> Apps Script` hoặc tạo project Apps Script mới.
-2. Mở file `google-apps-script/Code.gs`.
-3. Thay:
+```text
+google-apps-script/Code.gs
+```
+
+thay:
 
 ```javascript
 const SPREADSHEET_ID = "YOUR_SPREADSHEET_ID";
 ```
 
-bằng ID thực tế.
+bằng Spreadsheet ID thực tế.
 
-4. Có thể để `DRIVE_FOLDER_ID = ""` để hệ thống tự tạo/tìm thư mục `VKU_Survey_Photos`.
-5. Hoặc điền ID một folder Drive đã có.
+---
 
-### Bước 3 — Cấp quyền
+# 6. Cấu hình Google Drive
 
-Trong Apps Script chạy lần lượt:
+Project có thể sử dụng Google Drive để lưu ảnh khảo sát.
 
-```text
-setupSheet()
-setupDriveFolder()
-testConfiguration()
+Có thể để:
+
+```javascript
+DRIVE_FOLDER_ID = ""
 ```
 
-Lần chạy đầu tiên Google sẽ yêu cầu cấp quyền. Kiểm tra `testConfiguration()` trả về tên spreadsheet, sheet và folder Drive.
-
-### Bước 4 — Deploy Web App
-
-Chọn:
+để Apps Script tự tìm hoặc tạo folder:
 
 ```text
-Deploy -> New deployment -> Web app
+VKU_Survey_Photos
 ```
 
-=======
-VKU Field Survey PWA
-Ứng dụng khảo sát sinh viên VKU ngoài thực địa, thiết kế theo hướng offline-first:
+Hoặc có thể cấu hình ID của một folder Drive đã có.
 
-Form -> IndexedDB -> Google Apps Script -> Google Sheets + Google Drive
-                    \-> Google Maps link từ GPS
-1. File chính
-index.html: giao diện khảo sát và quản lý session offline.
-style.css: UI responsive pastel tím/trắng.
-app.js: IndexedDB, draft, GPS, camera, nén ảnh, sync/retry, export và modal detail.
-config.js: chỉ một nơi cấu hình URL Apps Script.
-manifest.json: PWA manifest.
-sw.js: Service Worker cache app shell; không cache request POST/API bên ngoài.
-google-apps-script/Code.gs: backend Google Apps Script.
-2. Cấu hình Apps Script
-Bước 1 — Google Sheets
-Tạo một Google Spreadsheet.
-Đặt tên tab dữ liệu là CSDL hoặc để Apps Script tự tạo.
-Lấy Spreadsheet ID trong URL:
-https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit
-Bước 2 — Apps Script
-Mở Extensions -> Apps Script hoặc tạo project Apps Script mới.
-Mở file google-apps-script/Code.gs.
-Thay:
-const SPREADSHEET_ID = "YOUR_SPREADSHEET_ID";
-bằng ID thực tế.
+Ảnh được nén ở frontend trước khi gửi để giảm kích thước request.
 
-Có thể để DRIVE_FOLDER_ID = "" để hệ thống tự tạo/tìm thư mục VKU_Survey_Photos.
-Hoặc điền ID một folder Drive đã có.
-Bước 3 — Cấp quyền
-Trong Apps Script chạy lần lượt:
+Tên file ảnh:
 
-setupSheet()
-setupDriveFolder()
-testConfiguration()
-Lần chạy đầu tiên Google sẽ yêu cầu cấp quyền. Kiểm tra testConfiguration() trả về tên spreadsheet, sheet và folder Drive.
+```text
+SESSION_ID.jpg
+```
 
-Bước 4 — Deploy Web App
-Chọn:
+Khi retry cùng một session, hệ thống sử dụng lại file tương ứng thay vì tạo ảnh trùng.
 
-Deploy -> New deployment -> Web app
->>>>>>> 96a164b30257fd53a4fe429a020ea068688077bc
-Thực hiện deployment dưới tài khoản có quyền ghi Google Sheets/Drive.
+Mặc định ảnh **không được tự động public**.
 
-Nếu cần người dùng điện thoại không đăng nhập Google, Web App phải được cấu hình quyền truy cập phù hợp với mô hình sử dụng. Không chia sẻ rộng hơn mức cần thiết.
+Nếu cần chia sẻ ảnh bằng link, có thể cấu hình:
+
+```javascript
+const SHARE_PHOTOS_ANYONE_WITH_LINK = true;
+```
+
+Việc chia sẻ cần phù hợp với chính sách quyền truy cập của tài khoản Google Workspace.
+
+---
+
+# 7. Deploy Google Apps Script
+
+Trong Apps Script:
+
+```text
+Deploy
+→ New deployment
+→ Web app
+```
 
 Sau khi deploy, lấy URL dạng:
 
-<<<<<<< HEAD
 ```text
 https://script.google.com/macros/s/DEPLOYMENT_ID/exec
-```
-
-### Bước 5 — Cấu hình frontend
-
-Mở `config.js` và chỉ thay:
-
-```javascript
-APPS_SCRIPT_URL: "YOUR_DEPLOYED_WEB_APP_URL"
-```
-
-Không cần sửa URL ở file khác.
-
-## 3. Chạy local
-
-Không mở `index.html` bằng `file://`.
-
-Dùng HTTP server, ví dụ:
-
-```bash
-python -m http.server 8080
 ```
 
 Sau đó mở:
 
 ```text
-http://localhost:8080
+config.js
 ```
 
-`localhost` là secure context hợp lệ cho các API như Service Worker/Geolocation trong môi trường phát triển.
+và cấu hình:
 
-## 4. Luồng offline
+```javascript
+APPS_SCRIPT_URL: "https://script.google.com/macros/s/DEPLOYMENT_ID/exec"
+```
 
-Khi nhấn `Gửi phiên khảo sát`:
+Không cần khai báo URL Apps Script ở nhiều file khác nhau.
 
-1. Validate form.
-2. Tạo `sessionId`.
-3. Lưu toàn bộ payload vào IndexedDB trước.
-4. Hiện `Đã lưu phiên khảo sát vào máy`.
-5. Nếu online thì tự động sync.
-6. Nếu request lỗi, record vẫn giữ trong IndexedDB ở trạng thái `error`.
-7. Có thể bấm `Thử lại` hoặc `Đồng bộ ngay`.
+---
 
-## 5. IndexedDB
+# 8. Cấp quyền và kiểm tra Backend
+
+Trong Apps Script có thể chạy:
+
+```javascript
+setupSheet()
+setupDriveFolder()
+testConfiguration()
+```
+
+Lần đầu chạy, Google sẽ yêu cầu cấp quyền.
+
+`testConfiguration()` được sử dụng để kiểm tra:
+
+* Spreadsheet
+* Sheet `CSDL`
+* Drive folder
+
+Endpoint cũng có thể kiểm tra bằng cách mở URL `/exec`.
+
+Nếu hoạt động bình thường, endpoint trả về dạng:
+
+```json
+{
+  "result": "ok",
+  "message": "VKU Survey endpoint is alive"
+}
+```
+
+---
+
+# 9. Luồng Offline-first
+
+Khi người dùng nhấn:
+
+```text
+Gửi phiên khảo sát
+```
+
+hệ thống thực hiện:
+
+```text
+1. Validate dữ liệu
+       ↓
+2. Tạo sessionId
+       ↓
+3. Lưu payload vào IndexedDB
+       ↓
+4. Hiển thị "Đã lưu phiên khảo sát vào máy"
+       ↓
+5. Kiểm tra kết nối mạng
+       ↓
+6. Nếu online → đồng bộ
+       ↓
+7. Nếu offline → giữ trạng thái pending
+       ↓
+8. Khi có mạng → tự động sync
+```
+
+Nếu đồng bộ thất bại, dữ liệu **không bị xóa khỏi máy**.
+
+Session được giữ lại với trạng thái:
+
+```text
+error
+```
+
+Người dùng có thể:
+
+* Thử lại
+* Đồng bộ ngay
+
+---
+
+# 10. IndexedDB
+
+Database:
 
 ```javascript
 DB_NAME = "vku_survey_db";
@@ -166,45 +390,9 @@ DB_VERSION = 1;
 STORE = "sessions";
 ```
 
-Record có:
+Mỗi record gồm:
 
 ```text
-=======
-https://script.google.com/macros/s/DEPLOYMENT_ID/exec
-Bước 5 — Cấu hình frontend
-Mở config.js và chỉ thay:
-
-APPS_SCRIPT_URL: "YOUR_DEPLOYED_WEB_APP_URL"
-Không cần sửa URL ở file khác.
-
-3. Chạy local
-Không mở index.html bằng file://.
-
-Dùng HTTP server, ví dụ:
-
-python -m http.server 8080
-Sau đó mở:
-
-http://localhost:8080
-localhost là secure context hợp lệ cho các API như Service Worker/Geolocation trong môi trường phát triển.
-
-4. Luồng offline
-Khi nhấn Gửi phiên khảo sát:
-
-Validate form.
-Tạo sessionId.
-Lưu toàn bộ payload vào IndexedDB trước.
-Hiện Đã lưu phiên khảo sát vào máy.
-Nếu online thì tự động sync.
-Nếu request lỗi, record vẫn giữ trong IndexedDB ở trạng thái error.
-Có thể bấm Thử lại hoặc Đồng bộ ngay.
-5. IndexedDB
-DB_NAME = "vku_survey_db";
-DB_VERSION = 1;
-STORE = "sessions";
-Record có:
-
->>>>>>> 96a164b30257fd53a4fe429a020ea068688077bc
 sessionId
 status
 createdAt
@@ -212,33 +400,57 @@ syncedAt
 retryCount
 lastError
 payload
-<<<<<<< HEAD
 ```
 
-Status:
+Các trạng thái:
 
 ```text
-=======
-Status:
-
->>>>>>> 96a164b30257fd53a4fe429a020ea068688077bc
 pending
 syncing
 synced
 error
-<<<<<<< HEAD
 ```
 
-## 6. Google Sheets
+Điều này giúp dữ liệu khảo sát vẫn tồn tại khi:
 
-Backend dùng chính xác 19 cột:
+* Mất Wi-Fi
+* Mất 4G/5G
+* Đóng trình duyệt
+* Reload trang
+* Request đồng bộ thất bại
+
+---
+
+# 11. Chống gửi dữ liệu trùng
+
+`sessionId` được sử dụng làm **idempotency key**.
+
+Backend sử dụng `LockService` trước khi kiểm tra và ghi dữ liệu.
+
+Nếu session đã tồn tại, backend trả về:
+
+```json
+{
+  "result": "ok",
+  "message": "Phiên khảo sát đã tồn tại",
+  "sessionId": "S-...",
+  "duplicate": true
+}
+```
+
+Frontend chỉ đánh dấu session là `synced` khi nhận được response hợp lệ với:
 
 ```text
-=======
-6. Google Sheets
-Backend dùng chính xác 19 cột:
+result: "ok"
+```
 
->>>>>>> 96a164b30257fd53a4fe429a020ea068688077bc
+---
+
+# 12. Google Sheets
+
+Backend sử dụng 19 cột dữ liệu:
+
+```text
 Timestamp (server)
 Session ID
 Tên phiên khảo sát
@@ -258,229 +470,336 @@ Mức lương mong muốn
 Kỹ năng còn thiếu
 Đề xuất hỗ trợ
 Ghi chú
-<<<<<<< HEAD
 ```
 
-Script không overwrite header/dữ liệu cũ. Nếu sheet đã có header nhưng không khớp, backend dừng với lỗi cấu hình thay vì tự sửa dữ liệu cũ.
+Backend không tự động overwrite dữ liệu cũ.
 
-## 7. Chống trùng
+Nếu header hiện tại không khớp cấu hình, hệ thống dừng với lỗi cấu hình thay vì tự sửa dữ liệu.
 
-`sessionId` là idempotency key.
+---
 
-Apps Script dùng `LockService` trước khi kiểm tra và ghi. Nếu session đã tồn tại, backend trả:
+# 13. Google Maps và GPS
 
-```json
-=======
-Script không overwrite header/dữ liệu cũ. Nếu sheet đã có header nhưng không khớp, backend dừng với lỗi cấu hình thay vì tự sửa dữ liệu cũ.
-
-7. Chống trùng
-sessionId là idempotency key.
-
-Apps Script dùng LockService trước khi kiểm tra và ghi. Nếu session đã tồn tại, backend trả:
-
->>>>>>> 96a164b30257fd53a4fe429a020ea068688077bc
-{
-  "result": "ok",
-  "message": "Phiên khảo sát đã tồn tại",
-  "sessionId": "S-...",
-  "duplicate": true
-}
-<<<<<<< HEAD
-```
-
-Frontend chỉ mark `synced` khi JSON có `result: "ok"`.
-
-## 8. Ảnh Drive
-
-=======
-Frontend chỉ mark synced khi JSON có result: "ok".
-
-8. Ảnh Drive
->>>>>>> 96a164b30257fd53a4fe429a020ea068688077bc
-Ảnh được nén ở frontend xuống khoảng <= 1.8 MB trước khi gửi.
-
-Backend lưu file theo tên:
-
-<<<<<<< HEAD
-```text
-SESSION_ID.jpg
-```
-
-Retry cùng `sessionId` sẽ tái sử dụng file đã có thay vì tạo ảnh trùng.
-
-Mặc định ảnh không được tự động public. Nếu thực sự cần link công khai, đổi:
-
-```javascript
-const SHARE_PHOTOS_ANYONE_WITH_LINK = true;
-```
-
-và kiểm tra chính sách Google Workspace của tài khoản triển khai.
-
-## 9. Đồng bộ lỗi
-
-Nếu session hiển thị `Lỗi`, xem phần lỗi bên dưới session hoặc mở `Xem chi tiết`.
-
-Kiểm tra theo thứ tự:
+Ứng dụng sử dụng Geolocation API để lấy:
 
 ```text
-=======
-SESSION_ID.jpg
-Retry cùng sessionId sẽ tái sử dụng file đã có thay vì tạo ảnh trùng.
-
-Mặc định ảnh không được tự động public. Nếu thực sự cần link công khai, đổi:
-
-const SHARE_PHOTOS_ANYONE_WITH_LINK = true;
-và kiểm tra chính sách Google Workspace của tài khoản triển khai.
-
-9. Đồng bộ lỗi
-Nếu session hiển thị Lỗi, xem phần lỗi bên dưới session hoặc mở Xem chi tiết.
-
-Kiểm tra theo thứ tự:
-
->>>>>>> 96a164b30257fd53a4fe429a020ea068688077bc
-1. Internet
-2. config.js -> APPS_SCRIPT_URL
-3. Mở URL /exec bằng trình duyệt
-4. Deployment có phải bản đang dùng không
-5. Authorization của Apps Script
-6. SPREADSHEET_ID
-7. Sheet CSDL
-8. Quyền Drive
-9. Executions trong Apps Script
-<<<<<<< HEAD
+Latitude
+Longitude
 ```
 
-Nếu `/exec` trả:
+Sau đó tạo Google Maps link từ tọa độ.
 
-```json
-{"result":"ok","message":"VKU Survey endpoint is alive"}
+Các trường hợp được xử lý:
+
+* GPS thành công
+* Người dùng từ chối quyền vị trí
+* GPS timeout
+* Không lấy được vị trí
+
+---
+
+# 14. Chạy PWA local
+
+Không mở trực tiếp:
+
+```text
+file://
 ```
 
-thì endpoint đang hoạt động.
+Thay vào đó chạy HTTP server.
 
-## 10. Cập nhật PWA
+Ví dụ:
 
-Sau khi sửa JS/CSS/HTML, tăng `CACHE_NAME` trong `sw.js`, ví dụ:
+```bash
+python -m http.server 8080
+```
+
+Sau đó mở:
+
+```text
+http://localhost:8080
+```
+
+`localhost` là secure context phù hợp cho các API như:
+
+* Service Worker
+* Geolocation
+
+---
+
+# 15. Chạy Android bằng Android Studio
+
+Project Android được tạo bằng Capacitor.
+
+Từ thư mục project:
+
+```bash
+npx cap sync android
+```
+
+Sau đó mở Android Studio:
+
+```text
+android/
+```
+
+Hoặc dùng:
+
+```bash
+npx cap open android
+```
+
+Trong Android Studio có thể:
+
+* Chọn Android Emulator
+* Kết nối thiết bị Android thật
+* Run project
+* Build APK
+
+---
+
+# 16. Build APK
+
+Trong Android Studio:
+
+```text
+Build
+→ Build APK(s)
+```
+
+APK debug thường được tạo trong:
+
+```text
+android/app/build/outputs/apk/debug/
+```
+
+Ví dụ:
+
+```text
+app-debug.apk
+```
+
+Thư mục `build/` không được commit lên GitHub.
+
+---
+
+# 17. Kiểm thử
+
+## Frontend
+
+Kiểm tra:
+
+* Responsive mobile
+* Thiếu field
+* Online submit
+* Offline submit
+* Reload sau khi lưu
+* Online trở lại tự động sync
+* Sync nhiều lần
+* Retry khi lỗi
+* GPS success
+* GPS denied
+* GPS timeout
+* Camera
+* Image preview
+* Image compression
+* Export JSON
+* Delete local record
+
+## Backend
+
+Kiểm tra:
+
+* GET `/exec`
+* POST hợp lệ
+* JSON lỗi
+* Thiếu `sessionId`
+* Duplicate `sessionId`
+* Ghi đúng 19 cột
+* GPS Maps URL
+* Drive photo
+* Retry không tạo ảnh duplicate
+* Header mismatch
+* Quyền Google Sheets
+* Quyền Google Drive
+
+## Android
+
+Kiểm tra:
+
+* App khởi động
+* Scroll toàn bộ form
+* Nhập dữ liệu
+* Camera
+* GPS
+* Offline storage
+* Sync khi có mạng
+* Android back button
+* Responsive layout
+* Build APK thành công
+
+---
+
+# 18. Cập nhật PWA
+
+Sau khi sửa:
+
+```text
+index.html
+app.js
+style.css
+```
+
+hãy tăng phiên bản cache trong:
+
+```text
+sw.js
+```
+
+Ví dụ:
 
 ```javascript
 const CACHE_NAME = "vku-field-survey-v3";
 ```
 
-=======
-Nếu /exec trả:
+Service Worker sẽ sử dụng cache mới.
 
-{"result":"ok","message":"VKU Survey endpoint is alive"}
-thì endpoint đang hoạt động.
+Nếu điện thoại vẫn hiển thị phiên bản cũ:
 
-10. Cập nhật PWA
-Sau khi sửa JS/CSS/HTML, tăng CACHE_NAME trong sw.js, ví dụ:
-
-const CACHE_NAME = "vku-field-survey-v3";
->>>>>>> 96a164b30257fd53a4fe429a020ea068688077bc
-Service Worker sẽ xóa cache cũ và cache lại app shell.
-
-Nếu điện thoại vẫn hiện bản cũ:
-
-<<<<<<< HEAD
 1. Đóng PWA.
 2. Mở lại.
-3. Hoặc xóa dữ liệu/cache của site trong trình duyệt rồi mở lại.
+3. Nếu cần, xóa cache/site data của website.
+4. Mở lại Live Demo.
 
-## 11. Kiểm thử
+---
 
-### Frontend
+# 19. Xử lý lỗi đồng bộ
 
-- thiếu field
-- online submit
-- offline submit
-- reload sau khi lưu
-- online trở lại tự sync
-- click sync nhiều lần
-- retry error
-- GPS success/denied/timeout
-- image preview/compression
-- export JSON
-- delete local record
-- responsive mobile
+Nếu session hiển thị:
 
-### Backend
+```text
+Lỗi
+```
 
-- GET `/exec`
-- POST hợp lệ
-- JSON lỗi
-- thiếu sessionId
-- duplicate sessionId
-- ghi đúng 19 cột
-- GPS Maps URL
-- Drive photo
-- retry không tạo ảnh duplicate
-- header mismatch không overwrite
-- quyền Sheets/Drive
+kiểm tra theo thứ tự:
 
-## 12. Lưu ý quan trọng về HTTP status của Apps Script
+```text
+1. Internet
+2. config.js
+3. APPS_SCRIPT_URL
+4. URL /exec
+5. Deployment Apps Script
+6. Authorization
+7. SPREADSHEET_ID
+8. Sheet CSDL
+9. Google Drive permission
+10. Apps Script Executions
+```
 
-Apps Script Content Service dùng `TextOutput`/JSON để trả dữ liệu từ `doGet`/`doPost`. Phần client vì vậy không nên chỉ dựa vào HTTP 200 để xác định thành công; frontend trong project này bắt buộc kiểm tra JSON `result` và xử lý body không phải JSON.
+Frontend không chỉ dựa vào HTTP status để xác định thành công.
 
-Đây là lý do backend trả cấu trúc nhất quán:
+Response cần kiểm tra JSON:
 
 ```json
-{"result":"ok", ...}
+{
+  "result": "ok"
+}
 ```
 
 hoặc:
 
 ```json
-{"result":"error", "message":"..."}
+{
+  "result": "error",
+  "message": "..."
+}
 ```
 
-## 13. Giới hạn còn tồn tại
+---
 
-- Một Web App Apps Script mở rộng cho anonymous users vẫn cần được bảo vệ về quyền truy cập và chống spam ở tầng triển khai.
-- Browser không cho PWA/Geolocation chạy đúng khi mở bằng `file://`.
-- Ảnh lớn làm tăng kích thước IndexedDB và request; frontend đã nén để giảm tải.
-- Muốn người khảo sát nhìn thấy file Drive, thư mục/file phải có quyền phù hợp; mặc định project không tự public ảnh.
-=======
-Đóng PWA.
-Mở lại.
-Hoặc xóa dữ liệu/cache của site trong trình duyệt rồi mở lại.
-11. Kiểm thử
-Frontend
-thiếu field
-online submit
-offline submit
-reload sau khi lưu
-online trở lại tự sync
-click sync nhiều lần
-retry error
-GPS success/denied/timeout
-image preview/compression
-export JSON
-delete local record
-responsive mobile
-Backend
-GET /exec
-POST hợp lệ
-JSON lỗi
-thiếu sessionId
-duplicate sessionId
-ghi đúng 19 cột
-GPS Maps URL
-Drive photo
-retry không tạo ảnh duplicate
-header mismatch không overwrite
-quyền Sheets/Drive
-12. Lưu ý quan trọng về HTTP status của Apps Script
-Apps Script Content Service dùng TextOutput/JSON để trả dữ liệu từ doGet/doPost. Phần client vì vậy không nên chỉ dựa vào HTTP 200 để xác định thành công; frontend trong project này bắt buộc kiểm tra JSON result và xử lý body không phải JSON.
+# 20. Git và các phiên bản
 
-Đây là lý do backend trả cấu trúc nhất quán:
+Repository:
 
-{"result":"ok", ...}
-hoặc:
+```text
+https://github.com/TrLy24/vku-field-survey-pwa
+```
 
-{"result":"error", "message":"..."}
-13. Giới hạn còn tồn tại
-Một Web App Apps Script mở rộng cho anonymous users vẫn cần được bảo vệ về quyền truy cập và chống spam ở tầng triển khai.
-Browser không cho PWA/Geolocation chạy đúng khi mở bằng file://.
-Ảnh lớn làm tăng kích thước IndexedDB và request; frontend đã nén để giảm tải.
-Muốn người khảo sát nhìn thấy file Drive, thư mục/file phải có quyền phù hợp; mặc định project không tự public ảnh.
->>>>>>> 96a164b30257fd53a4fe429a020ea068688077bc
+### Week 1
+
+Branch:
+
+```text
+main
+```
+
+Dùng cho phiên bản PWA và GitHub Pages.
+
+### Week 2
+
+Branch:
+
+```text
+capacitor-android
+```
+
+Dùng cho phiên bản Android được đóng gói bằng Capacitor.
+
+Các commit Week 2:
+
+```text
+3ef7c99 Add Capacitor Android baseline
+ac9961d Complete PWA and Android Capacitor app
+```
+
+Cách tổ chức này giúp giữ lại phiên bản Week 1 và đồng thời lưu riêng quá trình phát triển Android của Week 2.
+
+---
+
+# 21. Live Demo
+
+GitHub Pages:
+
+https://trly24.github.io/vku-field-survey-pwa/
+
+GitHub Repository:
+
+https://github.com/TrLy24/vku-field-survey-pwa
+
+> Live Demo sử dụng phiên bản PWA được triển khai bằng GitHub Pages. Phiên bản Android được chạy/build thông qua Capacitor và Android Studio.
+
+---
+
+# 22. Giới hạn hiện tại
+
+* PWA cần HTTPS hoặc localhost để sử dụng đầy đủ một số Web API như Service Worker và Geolocation.
+* Dữ liệu offline được lưu trên thiết bị bằng IndexedDB.
+* Ảnh làm tăng kích thước dữ liệu local và request; frontend đã nén ảnh trước khi upload.
+* Google Apps Script có giới hạn về thời gian thực thi và kích thước request.
+* Google Drive cần quyền phù hợp để người dùng có thể xem ảnh.
+* Nếu triển khai Web App cho anonymous users, cần cân nhắc quyền truy cập và chống spam ở tầng triển khai.
+
+---
+
+# 23. Mục tiêu của project
+
+VKU Field Survey PWA hướng đến một quy trình khảo sát có thể hoạt động trong điều kiện mạng không ổn định:
+
+```text
+Nhập khảo sát
+      ↓
+Lưu local
+      ↓
+Không có mạng
+      ↓
+Dữ liệu vẫn được giữ trên thiết bị
+      ↓
+Có mạng trở lại
+      ↓
+Automatic Sync
+      ↓
+Google Sheets / Google Drive
+```
+
+Phiên bản Android sử dụng Capacitor để đóng gói cùng ứng dụng web thành ứng dụng có thể chạy trên Android.
+
