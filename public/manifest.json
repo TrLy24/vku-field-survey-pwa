@@ -1,0 +1,16 @@
+{
+  "name": "VKU Field Survey",
+  "short_name": "VKU Survey",
+  "description": "Ứng dụng khảo sát sinh viên VKU ngoài thực địa.",
+  "lang": "vi-VN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f7f4fb",
+  "theme_color": "#6f42c1",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}

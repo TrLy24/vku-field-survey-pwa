@@ -1,3 +1,5 @@
+import { APP_CONFIG } from "./config.js";
+
 (() => {
   "use strict";
 

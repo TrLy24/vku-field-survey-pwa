@@ -1,5 +1,5 @@
-const APP_CONFIG = Object.freeze({
-  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbw2nuBzT_KNyPbUBf7zoUYWQlPO51IJR2eTZ2k6Qce-sCKUoE4HdkWySuSHGEwHQpI8/exec",
+export const APP_CONFIG = Object.freeze({
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzXWUPUfLCSX5Kh8gHJh7SWt_MHQ0maoX47FG1-QRIYbdOVZP6Qo0u8DV6s5N3KqxhL/exec",
   DB_NAME: "vku_survey_db",
   DB_VERSION: 1,
   STORE: "sessions",
