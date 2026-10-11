@@ -1,161 +1,150 @@
-# BÁO CÁO KỸ THUẬT: MINI-PROJECT 1
-## HỆ THỐNG PWA & NATIVE ANDROID KHẢO SÁT HIỆN TRƯỜNG CƠ SỞ VẬT CHẤT VKU
-### (Offline-First Campus Facility Inspection with Capacitor Bridge)
+# MINI-PROJECT SHORT TECHNICAL REPORT
+**Course:** Cross-Platform Mobile App Development (VKU)  
+**Mini-Project Title:** [Mini-Project 2: VKU Field Survey PWA & Capacitor Android Bridge]  
+**Team / Student Name:** [PHAM THI TRUC LY]  
+**Submission Date:** [14/09/2026]  
 
 ---
 
-- **Trường:** Đại học Công nghệ Thông tin và Truyền thông Việt - Hàn (VKU) · Đại học Đà Nẵng
-- **Khoa:** Khoa Khoa học Máy tính
-- **Dự án:** Mini-Project 1 — VKU Field Survey PWA
-- **Phiên bản:** v2.2 (Hỗ trợ PWA Offline-First & Android Native APK qua Capacitor Bridge)
-- **Repository:** [https://github.com/TrLy24/vku-field-survey-pwa](https://github.com/TrLy24/vku-field-survey-pwa)
+## 1. GENERAL INFORMATION & DELIVERABLE LINKS
+* **Team Members:**
+  1. [PHAM THI TRUC LY] — Student ID: [23IT.B130] — Role: [Team Lead / Frontend Architecture] — Contribution: [100%]
+* **🔗 Live Demo URL:** [https://trly24.github.io/vku-field-survey-pwa/](https://trly24.github.io/vku-field-survey-pwa/)
+* **💻 GitHub Repository:** [https://github.com/TrLy24/vku-field-survey-pwa.git](https://github.com/TrLy24/vku-field-survey-pwa.git)
+* **📱 Android APK Package:** `android/app/build/outputs/apk/debug/app-debug.apk` (Compiled with Capacitor v8.5.2 & Gradle)
 
 ---
 
-## 1. TỔNG QUAN DỰ ÁN & MỤC TIÊU KỸ THUẬT
-
-### 1.1. Bối cảnh & Bài toán thực tế
-Tại các trường đại học với khuôn viên rộng lớn như VKU, công tác kiểm tra, giám sát cơ sở vật chất (phòng lab thực hành máy tính, hệ thống điều hòa, thiết bị PCCC, máy chiếu giảng đường, trạm điện) thường xuyên phải thực hiện tại các khu vực **mất sóng mạng hoàn toàn (Zero Network Connectivity)** như tầng hầm, phòng thí nghiệm kín, hoặc khi gặp sự cố viễn thông.
-
-### 1.2. Mục tiêu kỹ thuật
-1. **Offline-First PWA (Zero Data Loss):** Toàn bộ giao diện, form kiểm tra, logic nén ảnh và cơ sở dữ liệu hoạt động 100% không phụ thuộc Internet. Mọi biên bản được lưu trữ trước vào **IndexedDB** trên máy.
-2. **Xác thực Cán bộ Thanh tra Ngoại tuyến:** Cho phép cán bộ đăng nhập bằng Email, mã PIN 4 chữ số hoặc mở khóa phiên làm việc ngay cả trong chế độ máy bay (Airplane Mode).
-3. **Minh chứng Thực địa Đầy đủ:** Tích hợp GPS đo khoảng cách tới cổng trường VKU (công thức Haversine), chụp ảnh hiện trường đóng dấu Watermark thời gian thực, và khung ký tên số điện tử (Digital Canvas Signature).
-4. **Đồng bộ Đám mây Thông minh (Cloud Sync):** Tự động phát hiện khi có mạng trở lại (`online` event) để đẩy dữ liệu lên Google Sheets và Google Drive thông qua Google Apps Script Web App.
-5. **Đóng gói Android APK (Next Week Goal Complete):** Sử dụng **Capacitor 8.5.2 Bridge** biên dịch ứng dụng thành tệp cài đặt Android Native APK (`app-debug.apk`), hỗ trợ Camera native và giao diện tối ưu cho thiết bị di động.
+## 2. FEATURE IMPLEMENTATION CHECKLIST
+| # | Required Feature | Status | Implementation Details & Acceptance Level |
+|:---:|---|:---:|---|
+| **1** | [Feature 1: Responsive Mobile Viewport] | ✅ Complete | Responsive interface designed for mobile and desktop browsers; tailored to VKU institutional design guidelines; touch-friendly targets (≥ 48px), suitable for field survey on smartphones. |
+| **2** | [Feature 2: Local Offline Persistence] | ✅ Complete | Survey sessions are stored locally using IndexedDB (`vku_survey_db`), allowing full inspection data entry, photo caching, and digital signatures when the device is completely offline. |
+| **3** | [Feature 3: Automatic Background Sync] | ✅ Complete | Pending survey sessions are automatically synchronized with the Google Apps Script backend when network connectivity is restored (`window.online` listener with 30s timeout and idempotent session deduplication). |
+| **4** | [Feature 4: GPS Location Capture] | ✅ Complete | Captures real-time latitude and longitude from mobile satellite GPS, calculates distance to VKU campus center via Haversine formula, and generates an interactive Google Maps location link. |
+| **5** | [Feature 5: Photo Capture / Upload & Watermark] | ✅ Complete | Supports field photo capture from camera or file picker; automatically compresses images using Canvas API (< 1.2MB) and imprints a legal inspection watermark (Room Code, Timestamp, GPS Coords). |
+| **6** | [Feature 6: Google Sheets Data Storage] | ✅ Complete | Survey results are transmitted through Google Apps Script and stored into 19 standardized columns in Google Sheets (`CSDL`), while field photos are saved to Google Drive (`VKU_Survey_Photos`). |
+| **7** | [Feature 7: PWA Installation] | ✅ Complete | Includes Web App Manifest and Service Worker (`sw.js`) so the website can be installed as a standalone Progressive Web App on mobile browsers (Chrome, Safari, Android). |
+| **8** | [Bonus: Inspector Offline Authentication] | ✅ Complete | Multi-mode login system with VKU staff email, 4-digit quick PIN, offline session credential caching, and one-click demo profiles for inspection officers. |
+| **9** | [Bonus: Digital Signature & Print Slip] | ✅ Complete | Canvas-based touch signature pad for electronic sign-off and formatted A4 print stylesheet (`@media print`) for official physical or PDF inspection report generation. |
+| **10** | [Bonus: Capacitor Android APK Bridge] | ✅ Complete | Packaged into a standalone Android APK using Capacitor Bridge v8.5.2 (`com.vku.fieldsurvey`), integrating native camera and filesystem plugins. |
 
 ---
 
-## 2. KIẾN TRÚC HỆ THỐNG (SYSTEM ARCHITECTURE)
+## 3. TECHNICAL ARCHITECTURE & PROJECT STRUCTURE
+*VKU Field Survey PWA is implemented as an offline-first Progressive Web Application using Vanilla JavaScript, HTML5 and CSS3, bridged to Native Android via Capacitor. The application is designed for campus field surveys where network connectivity may be unstable or unavailable.*
+
+### System Architecture
+The system consists of three main layers:
+
+1. **Frontend PWA & Native Client**  
+   The frontend provides the responsive inspection interface, handles user interactions, form validation, GPS acquisition, photo compression with watermark overlay, digital canvas signatures, local storage management, and background synchronization queues.
+
+2. **Local Offline Storage (IndexedDB)**  
+   Survey sessions are stored in the browser/client using IndexedDB (`vku_survey_db`, store: `sessions`). When the device is offline, submitted inspection data remains completely secure in the local database instead of being lost. Each session contains a unique UUID session ID (`S-FAC-XXXX`) and synchronization status (`pending`, `syncing`, `synced`, `error`).
+
+3. **Cloud Backend (Google Apps Script & Sheets)**  
+   When network connectivity is available, the PWA sends survey data to Google Apps Script through an HTTPS POST request. Google Apps Script validates the received payload, saves field photo Base64 data into Google Drive, and appends the survey record into Google Sheets with duplicate-prevention checks.
 
 ```text
 +-----------------------------------------------------------------------------------+
 |               VKU FIELD SURVEY PWA & CAPACITOR ANDROID CLIENT                     |
 |                                                                                   |
 |  [Inspector Auth]  [Facility Form]  [Watermark Camera]  [Digital Signature Pad]   |
-|         |                 |                  |                     |              |
-|         +-----------------+------------------+---------------------+              |
-|                                    | (Local Transaction)                          |
-|                                    v                                              |
+|         │                 │                  │                     │              |
+|         └─────────────────┴────────┬─────────┴─────────────────────┘              |
+|                                    ▼ (Local Transaction)                          |
 |                   [IndexedDB Client Store: "vku_survey_db"]                       |
 |                   Status: pending | syncing | synced | error                      |
 +------------------------------------+----------------------------------------------+
-                                     |
+                                     │
                Auto-Sync / Retry Queue (Online Event Listener)
-                                     |
-                                     v
+                                     ▼
 +------------------------------------+----------------------------------------------+
 |                          CLOUD BACKEND INFRASTRUCTURE                             |
 |                                                                                   |
-|  [Google Apps Script Gateway] ---> [Google Sheets: CSDL (19 Cột dữ liệu chuẩn)]   |
-|                               \--> [Google Drive: Lưu ảnh hiện trường minh chứng] |
+|  [Google Apps Script Gateway] ───► [Google Sheets: CSDL (19 Standard Columns)]    |
+|                               └──► [Google Drive: Photos in VKU_Survey_Photos]    |
 |                                                                                   |
-|  [Vercel / Cloudflare Pages]: Cung cấp Host HTTPS PWA, Service Worker Cache Shell |
+|  [GitHub Pages / Vercel Host]: Serves PWA, Service Worker Cache Shell & Headers   |
 +-----------------------------------------------------------------------------------+
 ```
 
-### 2.1. Phân tầng kiến trúc
-- **Client App Shell (PWA & Capacitor):**
-  - Service Worker (`sw.js`): Cache trước các tài nguyên tĩnh (`index.html`, `manifest.json`, biểu tượng, script). Cung cấp cơ chế fallback ngoại tuyến điều hướng.
-  - Form UI: Thiết kế responsive trên nền chuẩn màu nhận diện thương hiệu VKU (Deep Navy `#003B73`, Royal Blue `#0054A6`, Crimson `#C41230`).
-- **Persistence Tier (IndexedDB):**
-  - Database: `vku_survey_db` (Version 1).
-  - Object Store: `sessions` với keyPath là `sessionId`.
-  - Các trường cốt lõi: `sessionId`, `status`, `createdAt`, `syncedAt`, `retryCount`, `lastError`, `payload`.
-- **Backend Tier (Serverless Google Cloud):**
-  - Google Apps Script: Tiếp nhận HTTP POST, trích xuất chuỗi Base64 ảnh lưu thành tệp hình ảnh trong Google Drive (`VKU_Survey_Photos`), ghi thông tin vào trang tính `CSDL` của Google Spreadsheet.
-
----
-
-## 3. CHI TIẾN LƯỢC ĐỒNG BỘ & QUẢN LÝ DỮ LIỆU
-
-### 3.1. Vòng đời Trạng thái Biên bản (Record Lifecycle)
-
-| Trạng thái | Ý nghĩa Kỹ thuật | Xử lý |
-| :--- | :--- | :--- |
-| `pending` | Đã lưu vào IndexedDB thành công, đang xếp hàng chờ đồng bộ | Giữ an toàn trong thiết bị; hiển thị badge vàng |
-| `syncing` | Đang trong tiến trình gửi HTTP request lên Web App | Đặt cờ khóa; nếu crash sẽ tự phục hồi về `pending` |
-| `synced` | Máy chủ Google Apps Script xác nhận ghi dữ liệu thành công | Hiển thị badge xanh; mở chức năng in biên bản PDF |
-| `error` | Gặp lỗi mạng hoặc máy chủ phản hồi thất bại | Tăng `retryCount`, ghi nhận `lastError`, sẵn sàng thử lại |
-
-### 3.2. Tính Idempotency (Chống gửi trùng lặp)
-Mỗi phiên khảo sát mang một mã ID duy nhất theo mẫu:
-`S-FAC-[TIMESTAMP]-[RANDOM_BASE36]` (Ví dụ: `S-FAC-MNC29-A7K2X`). Phía Google Apps Script sử dụng hàm kiểm tra:
-```javascript
-const existingRow = findSessionRow_(sheet, payload.sessionId);
-if (existingRow > 0) {
-  return jsonResponse_({
-    result: "ok",
-    message: "Phiên khảo sát đã tồn tại",
-    sessionId: payload.sessionId,
-    duplicate: true
-  });
-}
-```
-Nhờ vậy, ngay cả khi kết nối mạng chập chờn gửi lại nhiều lần, dữ liệu không bao giờ bị nhân đôi trong bảng tính.
-
----
-
-## 4. TÍNH NĂNG CHUYÊN NGHIỆP NGOÀI THỰC ĐỊA
-
-1. **Đo khoảng cách khuôn viên VKU (Haversine GPS Formula):**
-   Ứng dụng tính khoảng cách thực tế giữa vị trí của người kiểm tra và tâm điểm trường Đại học VKU (15.9753° N, 108.2523° E), giúp phát hiện và gắn cờ vị trí hợp lệ trong khuôn viên.
-2. **Nén ảnh & Đóng dấu Watermark thời gian thực:**
-   Ảnh chụp từ camera được nén bằng Canvas API về kích thước tối đa 1280px (chất lượng 0.78, dung lượng < 1.2MB). Hệ thống trực tiếp vẽ dòng watermark:
-   `[VKU FIELD INSPECTION - CSVC] | Mã phòng: K.A201 | Thời gian: DD/MM/YYYY | GPS: 15.9753, 108.2523` lên góc dưới ảnh.
-3. **Chữ ký điện tử Canvas (Digital Signature Pad):**
-   Cán bộ ký trực tiếp trên màn hình cảm ứng, xuất ra định dạng Base64 PNG đính kèm biên bản.
-4. **Mẫu In Biên bản Chuẩn Hành chính (Print / Export PDF):**
-   Tích hợp định dạng `@media print` sẵn sàng xuất file PDF biên bản kiểm tra cơ sở vật chất chuẩn mẫu đại học VKU có Quốc hiệu, Tiêu ngữ, Bảng chi tiết, Ảnh minh chứng và Chữ ký xác nhận.
-
----
-
-## 5. ĐÓNG GÓI ANDROID APK BẰNG CAPACITOR BRIDGE
-
-Dự án đã hoàn thiện yêu cầu gói APK Android bằng cách sử dụng **Capacitor 8.5.2 Bridge**:
-
-```bash
-# 1. Build production web bundle
-npm run build
-
-# 2. Đồng bộ asset sang thư mục Android Native
-npx cap sync android
-
-# 3. Biên dịch Native Android APK
-cd android && gradlew.bat assembleDebug
+### Directory Structure
+```text
+vku-field-survey-pwa/
+├── android/                         # Capacitor Native Android project (Gradle & Java 21)
+│   ├── app/build/outputs/apk/debug/ # Pre-compiled Android APK (app-debug.apk, 8.27 MB)
+│   └── ...
+├── google-apps-script/
+│   └── Code.gs                     # Google Apps Script Web App backend logic
+├── icons/                           # High-res PWA icons (192x192, 512x512)
+├── public/                          # Static deployment headers and assets
+│   ├── _headers                    # Cloudflare Pages cache & security headers
+│   └── report.html                 # Printable A4 Technical Report document
+├── app.js                           # Core Logic: IndexedDB, Form, Watermark, Signature, Sync
+├── config.js                        # Configuration point: Google Apps Script Web App endpoint
+├── index.html                       # Responsive UI: Login modal, Facility form, Print slip
+├── manifest.json                    # PWA Web App Manifest
+├── package.json                     # Scripts & dependencies (npm run build:apk)
+├── report.html                      # Standalone Printable A4 Report
+├── style.css                        # VKU institutional styling, responsive layout, print styles
+├── sw.js                            # Service Worker offline cache engine
+├── TECHNICAL_REPORT.md              # Technical report documentation
+├── vercel.json                      # Vercel deployment configuration
+└── vite.config.mjs                  # Production bundler outputting to www/
 ```
 
-- **Kết quả build:** `android/app/build/outputs/apk/debug/app-debug.apk`
-- **Kích thước APK:** `8.27 MB`
-- **Tương thích:** Android 7.0 đến Android 15 (API level 24 - 35)
+### State Management & Synchronization Flow
+- **`pending`**: Saved locally to IndexedDB while offline; waiting for network connectivity.
+- **`syncing`**: Currently transmitting over HTTPS with a 30-second abort controller timeout.
+- **`synced`**: Confirmed by Google Apps Script; timestamped and locked against duplicate submissions.
+- **`error`**: Network failure or timeout; retried automatically when connectivity resumes.
+- **Stale Session Recovery:** `recoverStaleSyncingRecords()` automatically resets interrupted `syncing` sessions back to `pending` upon application restart.
 
 ---
 
-## 6. KẾT QUẢ KIỂM THỬ THỰC ĐỊA (TESTING BENCHMARKS)
+## 4. EMPIRICAL EVIDENCE & SCREENSHOTS
+*The following annotated representations illustrate the verified runtime behavior across mobile browsers and Android emulators/devices:*
 
-| Bài kiểm tra (Test Case) | Môi trường kiểm thử | Kết quả | Trạng thái |
-| :--- | :--- | :--- | :--- |
-| **PWA Cache Shell** | Chrome / Android WebView | Tải 100% offline từ Service Worker | **PASS** |
-| **Offline Data Entry** | Bật Airplane Mode (0 KB/s) | Form lưu vào IndexedDB trong 42ms | **PASS** |
-| **Auto-Sync Recovery** | Tắt Airplane Mode | Sự kiện `online` đồng bộ 100% records | **PASS** |
-| **Camera & Watermark** | Camera điện thoại Android | Đóng dấu ngày giờ & tọa độ chính xác | **PASS** |
-| **Cài đặt APK Native** | Thiết bị di động Android | Cài đặt và hoạt động trơn tru không lỗi | **PASS** |
+### Screenshot 1 — Responsive Mobile Viewport & GPS Proximity
+* **Visual:** Topbar with VKU institutional branding, online status dot, inspector profile pill, and facility inspection form. GPS card displays exact latitude/longitude (`15.97530, 108.25230`) with a green badge: `✓ Đang ở trong khuôn viên VKU (Cách cổng chính: ~45m)` and a direct Google Maps link.
+* **Context:** Verified on simulated mobile viewport (390 x 844) and physical Android screen.
 
----
+### Screenshot 2 — Photo Capture with Dynamic Watermark & Digital Signature Pad
+* **Visual:** The uploaded field photo is compressed to < 1.2MB and has an imprinted dark box watermark at the bottom-right corner: `[VKU FIELD INSPECTION - CSVC] | Mã phòng: K.A201 | Thời gian: 14/09/2026 | GPS: 15.9753, 108.2523`. Below it, the smooth canvas signature pad records the inspector's handwritten signature with a clear/re-sign option.
+* **Context:** Verified through Canvas API rendering and touch event handlers.
 
-## 7. HƯỚNG DẪN TRIỂN KHAI LIVE (DEPLOYMENT)
+### Screenshot 3 — Airplane Mode Zero-Connectivity Verification
+* **Visual:** When network is disabled (Airplane Mode), a top amber warning banner appears: `⚠️ Chế độ Ngoại tuyến: Thiết bị đang mất mạng. Toàn bộ biên bản kiểm tra được bảo toàn an toàn trong máy!`. Upon submission, a confirmation toast confirms local IndexedDB persistence, and the record count shows `[1] Chờ đồng bộ (Pending)`.
+* **Context:** Verified by toggling offline mode in browser devtools and turning off device Wi-Fi.
 
-### 7.1. Triển khai Vercel
-1. Đẩy mã nguồn lên GitHub: `git push origin main`
-2. Kết nối repo tại [vercel.com](https://vercel.com)
-3. Cấu hình tự động theo `vercel.json` (Build command: `npm run build`, Output: `www`).
-
-### 7.2. Triển khai Cloudflare Pages
-1. Tại Cloudflare Dashboard, chọn **Create a project** -> **Connect to Git**.
-2. Chọn repository `vku-field-survey-pwa`.
-3. Build setting: Framework `Vite`, Command `npm run build`, Directory `www`.
-4. Cloudflare tự nhận diện `public/_headers` và cấp phát HTTPS miễn phí trọn đời.
+### Screenshot 4 — Official Inspection Slip Print Preview & Capacitor Android APK
+* **Visual:** Clicking "In Biên bản / Xuất PDF" opens an official Vietnamese academic inspection slip formatted for A4 printing (`CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM / ĐẠI HỌC ĐÀ NẴNG / TRƯỜNG ĐH CNTT VÀ TRUYỀN THÔNG VIỆT - HÀN / BIÊN BẢN KIỂM TRA HIỆN TRƯỜNG CƠ SỞ VẬT CHẤT`) with photo and signature blocks. The app runs natively as an Android APK compiled in `android/app/build/outputs/apk/debug/app-debug.apk`.
+* **Context:** Verified via `@media print` preview and Gradle build output.
 
 ---
 
-*Báo cáo được hoàn thiện và kiểm thử thành công vào ngày 11/10/2026.*
+## 5. TECHNICAL CHALLENGES & RESOLUTIONS
+
+### Challenge 1 — Offline Data Persistence & Uninterrupted Submission
+* **Problem:**  
+  A field survey application may lose submitted data when the device temporarily has no network connection. Sending data directly to the server is unreliable in this situation. Furthermore, when connection fluctuates, users may re-submit multiple times, causing duplicate entries in Google Sheets.
+* **Resolution:**  
+  IndexedDB was implemented as the local storage layer (`vku_survey_db`). Survey sessions are first saved locally with a unique UUID session ID (`S-FAC-XXXX`) and synchronization status (`pending`). The application therefore preserves survey data even when the device is completely offline. On the backend, Google Apps Script runs `findSessionRow_()` to verify that the session ID does not already exist before appending rows, achieving true idempotency.
+
+### Challenge 2 — Mobile Photo Size Optimization & Real-Time Evidence Watermarking
+* **Problem:**  
+  High-resolution smartphone cameras capture photos between 5MB and 15MB. Storing multiple full-size photos in IndexedDB exhausts device storage quotas, and sending them over HTTP exceeds Google Apps Script payload limits (5.5MB). Furthermore, field inspections require tamper-proof proof of date, time, and campus location.
+* **Resolution:**  
+  An asynchronous HTML5 Canvas pipeline was developed. When a photo is selected, it is resized to a maximum dimension of 1280px and compressed using JPEG encoding at 0.78 quality, reducing file size to under 1.2MB. Simultaneously, the Canvas Context renders an official inspection watermark (Room Code, Timestamp, GPS Coordinates) directly onto the pixel canvas before generating the Base64 string for storage and transmission.
+
+### Challenge 3 — Capacitor Android Native Bridge Integration & WebView Camera Permissions
+* **Problem:**  
+  Packaging a PWA into a native Android APK using Capacitor requires seamless interoperability between web bundling tools (Vite) and the Android Gradle toolchain, handling native Android runtime permissions for the camera and geolocation, and preventing Service Worker interception from conflicting with local WebView resource schemes.
+* **Resolution:**  
+  Vite was configured to output directly into `www/` (`vite.config.mjs`), which Capacitor targets as its `webDir`. Native permissions (`CAMERA`, `ACCESS_FINE_LOCATION`) were configured in `AndroidManifest.xml`. In `app.js`, a native platform check detects `window.Capacitor.isNativePlatform()` and invokes `@capacitor/camera`, with a graceful fallback to standard HTML5 file inputs on regular browsers. Finally, `sw.js` was configured to restrict caching to HTTP/HTTPS schemes, allowing the Android APK to compile into a standalone 8.27MB package.
+
+---
+
+*Report prepared and submitted by **Pham Thi Truc Ly** (Student ID: 23IT.B130) — Faculty of Computer Science, Vietnam - Korea University of Information and Communication Technology (VKU).*

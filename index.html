@@ -575,7 +575,7 @@
 
       <div class="login-modal-body">
         <div class="login-offline-notice">
-          <span>⚡ Hỗ trợ Đăng nhập Ngoại tuyến (Offline Login): Phiên đăng nhập được lưu an toàn trong thiết bị, hoạt động ngay cả khi ở tầng hầm hoặc nơi mất mạng.</span>
+          <span>⚡ Chế độ demo ngoại tuyến: tài khoản mẫu được kiểm tra ngay trên thiết bị. Mật khẩu demo: <strong>vku2026@pass</strong>; PIN demo: <strong>1234</strong>. Đây không phải xác thực bảo mật cho môi trường production.</span>
         </div>
 
         <!-- Login Tabs (Credentials vs Quick PIN) -->
@@ -588,11 +588,11 @@
         <form id="loginFormCreds" class="login-form">
           <div class="field">
             <label for="loginEmail">Email Cán bộ / Mã Thanh tra <span>*</span></label>
-            <input id="loginEmail" type="email" required placeholder="canbo.csvc@vku.udn.vn" autocomplete="username" value="canbo.csvc@vku.udn.vn">
+            <input id="loginEmail" type="email" required placeholder="canbo.csvc@vku.udn.vn" autocomplete="username">
           </div>
           <div class="field">
             <label for="loginPassword">Mật khẩu <span>*</span></label>
-            <input id="loginPassword" type="password" required placeholder="••••••••" autocomplete="current-password" value="vku2026@pass">
+            <input id="loginPassword" type="password" required placeholder="Nhập mật khẩu demo" autocomplete="current-password">
           </div>
           <div class="login-options">
             <label class="remember-label">
@@ -608,7 +608,16 @@
         <!-- PIN Form -->
         <form id="loginFormPin" class="login-form" hidden>
           <div class="pin-instructions">
-            Nhập mã PIN 4 chữ số của cán bộ kiểm tra để truy cập nhanh ngoài hiện trường:
+            Chọn tài khoản và nhập mã PIN 4 chữ số:
+          </div>
+          <div class="field">
+            <label for="pinAccount">Tài khoản cán bộ <span>*</span></label>
+            <select id="pinAccount" required>
+              <option value="">-- Chọn tài khoản --</option>
+              <option value="canbo.csvc@vku.udn.vn">ThS. Nguyễn Văn An</option>
+              <option value="kythuat.lab@vku.udn.vn">KS. Trần Thị Mai</option>
+              <option value="thanhtra.pccc@vku.udn.vn">ThS. Lê Hoàng Nam</option>
+            </select>
           </div>
           <div class="pin-inputs">
             <input id="pin1" class="pin-digit" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
@@ -627,15 +636,15 @@
           <div class="demo-accounts-grid">
             <button type="button" class="demo-acc-btn" data-email="canbo.csvc@vku.udn.vn" data-name="ThS. Nguyễn Văn An" data-dept="Phòng Quản trị Thiết bị & CSVC" data-role="Cán bộ Giám sát">
               <strong>ThS. Nguyễn Văn An</strong>
-              <small>Phòng Quản trị Thiết bị & CSVC (PIN: 1234)</small>
+              <small>Phòng Quản trị Thiết bị & CSVC · chọn để điền email</small>
             </button>
             <button type="button" class="demo-acc-btn" data-email="kythuat.lab@vku.udn.vn" data-name="KS. Trần Thị Mai" data-dept="Trung tâm Quản trị Mạng & Lab IT" data-role="Kỹ thuật viên Lab">
               <strong>KS. Trần Thị Mai</strong>
-              <small>Trung tâm Quản trị Mạng & Lab IT (PIN: 1234)</small>
+              <small>Trung tâm Quản trị Mạng & Lab IT · chọn để điền email</small>
             </button>
             <button type="button" class="demo-acc-btn" data-email="thanhtra.pccc@vku.udn.vn" data-name="ThS. Lê Hoàng Nam" data-dept="Ban Thanh tra & An toàn PCCC" data-role="Thanh tra An toàn">
               <strong>ThS. Lê Hoàng Nam</strong>
-              <small>Ban Thanh tra & An toàn PCCC (PIN: 1234)</small>
+              <small>Ban Thanh tra & An toàn PCCC · chọn để điền email</small>
             </button>
           </div>
         </div>

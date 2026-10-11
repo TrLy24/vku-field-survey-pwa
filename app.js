@@ -31,6 +31,7 @@ import { APP_CONFIG } from "./config.js";
       name: "ThS. Nguyễn Văn An",
       dept: "Phòng Quản trị Thiết bị & CSVC",
       role: "Cán bộ Giám sát",
+      password: "vku2026@pass",
       pin: "1234",
       avatar: "NA"
     },
@@ -40,6 +41,7 @@ import { APP_CONFIG } from "./config.js";
       name: "KS. Trần Thị Mai",
       dept: "Trung tâm Quản trị Mạng & Lab IT",
       role: "Kỹ thuật viên Lab",
+      password: "vku2026@pass",
       pin: "1234",
       avatar: "TM"
     },
@@ -49,6 +51,7 @@ import { APP_CONFIG } from "./config.js";
       name: "ThS. Lê Hoàng Nam",
       dept: "Ban Thanh tra & An toàn PCCC",
       role: "Thanh tra An toàn",
+      password: "vku2026@pass",
       pin: "1234",
       avatar: "LN"
     }
@@ -217,20 +220,43 @@ import { APP_CONFIG } from "./config.js";
 
   const AUTH_STORAGE_KEY = "vku_field_survey_auth";
 
-  function getCurrentUser() {
-    try {
-      const saved = localStorage.getItem(AUTH_STORAGE_KEY);
-      if (saved) return JSON.parse(saved);
-    } catch {}
-    // Default logged in demo user for immediate test friendliness
-    return DEMO_INSPECTORS[0];
+  function getPublicUser(user) {
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      dept: user.dept,
+      role: user.role,
+      avatar: user.avatar
+    };
   }
 
-  function setCurrentUser(user) {
+  function getCurrentUser() {
+    for (const storage of [localStorage, sessionStorage]) {
+      const saved = storage.getItem(AUTH_STORAGE_KEY);
+      if (!saved) continue;
+
+      let parsed;
+      try {
+        parsed = JSON.parse(saved);
+      } catch {
+        storage.removeItem(AUTH_STORAGE_KEY);
+        continue;
+      }
+
+      const user = parsed && DEMO_INSPECTORS.find((inspector) => inspector.id === parsed.id);
+      if (user) return getPublicUser(user);
+      storage.removeItem(AUTH_STORAGE_KEY);
+    }
+    return null;
+  }
+
+  function setCurrentUser(user, remember = true) {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    sessionStorage.removeItem(AUTH_STORAGE_KEY);
     if (user) {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
-    } else {
-      localStorage.removeItem(AUTH_STORAGE_KEY);
+      const publicUser = getPublicUser(user);
+      (remember ? localStorage : sessionStorage).setItem(AUTH_STORAGE_KEY, JSON.stringify(publicUser));
     }
     updateUserUI();
   }
@@ -291,43 +317,50 @@ import { APP_CONFIG } from "./config.js";
   function handleLoginSubmit(event) {
     event.preventDefault();
     const email = safeText($("loginEmail").value).toLowerCase();
+    const password = $("loginPassword").value;
     const found = DEMO_INSPECTORS.find((u) => u.email.toLowerCase() === email);
 
-    if (found) {
-      setCurrentUser(found);
+    if (found && found.password === password) {
+      try {
+        setCurrentUser(found, $("rememberMeCheckbox").checked);
+      } catch (error) {
+        showToast("Không thể lưu phiên đăng nhập trên thiết bị. Vui lòng kiểm tra cài đặt lưu trữ.");
+        console.error("Không thể lưu phiên đăng nhập:", error);
+        return;
+      }
+      $("loginPassword").value = "";
       closeLoginModal();
       showToast(`Chào mừng ${found.name} đã đăng nhập!`);
     } else {
-      // Allow custom login credentials for field inspectors
-      const customUser = {
-        id: "usr_" + Date.now(),
-        email: email,
-        name: email.split("@")[0].toUpperCase(),
-        dept: "Phòng Quản trị Thiết bị & CSVC",
-        role: "Cán bộ Giám sát",
-        avatar: email.slice(0, 2).toUpperCase()
-      };
-      setCurrentUser(customUser);
-      closeLoginModal();
-      showToast(`Đăng nhập thành công với tài khoản ${email}`);
+      showToast("Email hoặc mật khẩu không chính xác.");
     }
   }
 
   function handlePinLoginSubmit(event) {
     event.preventDefault();
-    const p1 = safeText($("pin1").value);
-    const p2 = safeText($("pin2").value);
-    const p3 = safeText($("pin3").value);
-    const p4 = safeText($("pin4").value);
-    const enteredPin = `${p1}${p2}${p3}${p4}`;
+    const enteredPin = ["pin1", "pin2", "pin3", "pin4"]
+      .map((id) => safeText($(id).value))
+      .join("");
+    const selectedEmail = $("pinAccount").value;
 
-    if (enteredPin.length !== 4) {
+    if (!/^\d{4}$/.test(enteredPin)) {
       showToast("Vui lòng nhập đủ 4 chữ số mã PIN.");
       return;
     }
 
-    const matched = DEMO_INSPECTORS.find((u) => u.pin === enteredPin) || DEMO_INSPECTORS[0];
-    setCurrentUser(matched);
+    const matched = DEMO_INSPECTORS.find((user) => user.email === selectedEmail && user.pin === enteredPin);
+    if (!matched) {
+      showToast("Tài khoản hoặc mã PIN không chính xác.");
+      return;
+    }
+    try {
+      setCurrentUser(matched, $("rememberMeCheckbox").checked);
+    } catch (error) {
+      showToast("Không thể lưu phiên đăng nhập trên thiết bị. Vui lòng kiểm tra cài đặt lưu trữ.");
+      console.error("Không thể lưu phiên đăng nhập:", error);
+      return;
+    }
+    ["pin1", "pin2", "pin3", "pin4"].forEach((id) => { $(id).value = ""; });
     closeLoginModal();
     showToast(`Xác thực mã PIN thành công! Chào ${matched.name}.`);
   }
@@ -1565,9 +1598,14 @@ import { APP_CONFIG } from "./config.js";
     $("closeProfileBtn2").addEventListener("click", closeProfileModal);
 
     $("logoutBtn").addEventListener("click", () => {
-      setCurrentUser(null);
-      closeProfileModal();
-      showToast("Đã đăng xuất khỏi phiên làm việc.");
+      try {
+        setCurrentUser(null);
+        closeProfileModal();
+        showToast("Đã đăng xuất khỏi phiên làm việc.");
+      } catch (error) {
+        showToast("Không thể xóa phiên đăng nhập khỏi thiết bị.");
+        console.error("Không thể xóa phiên đăng nhập:", error);
+      }
     });
 
     $("loginFormCreds").addEventListener("submit", handleLoginSubmit);
@@ -1592,12 +1630,11 @@ import { APP_CONFIG } from "./config.js";
     document.querySelectorAll(".demo-acc-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         const email = btn.dataset.email;
-        const matched = DEMO_INSPECTORS.find((u) => u.email === email);
-        if (matched) {
-          setCurrentUser(matched);
-          closeLoginModal();
-          showToast(`Đã chọn tài khoản: ${matched.name}`);
-        }
+        const matched = DEMO_INSPECTORS.find((user) => user.email === email);
+        if (!matched) return;
+        $("loginTabCredsBtn").click();
+        $("loginEmail").value = matched.email;
+        $("loginPassword").focus();
       });
     });
 
@@ -1606,6 +1643,7 @@ import { APP_CONFIG } from "./config.js";
     pinInputs.forEach((input, index) => {
       if (!input) return;
       input.addEventListener("input", () => {
+        input.value = input.value.replace(/\D/g, "").slice(0, 1);
         if (input.value && index < pinInputs.length - 1) {
           pinInputs[index + 1].focus();
         }
