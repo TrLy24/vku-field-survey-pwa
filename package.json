@@ -1,13 +1,15 @@
 {
   "name": "vku-field-survey-pwa",
   "version": "1.0.0",
-  "description": "<<<<<<< HEAD\r # VKU Field Survey PWA",
+  "description": "VKU Field Survey PWA - Offline-first Campus Facility Inspection System for VKU",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cap:sync": "vite build && npx cap sync android",
+    "build:apk": "vite build && npx cap sync android && cd android && gradlew.bat assembleDebug"
   },
   "repository": {
     "type": "git",

@@ -3,269 +3,688 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#6f42c1">
-  <meta name="description" content="VKU Field Survey — khảo sát sinh viên ngoài thực địa, hỗ trợ offline và GPS.">
+  <meta name="theme-color" content="#0054A6">
+  <meta name="description" content="VKU Field Survey — Hệ thống khảo sát & kiểm tra cơ sở vật chất VKU ngoài thực địa, hỗ trợ hoạt động offline 100% với IndexedDB và GPS.">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="style.css">
-  <title>VKU Field Survey</title>
+  <title>VKU Field Survey — Hệ thống Khảo sát Cơ sở vật chất</title>
 </head>
 <body>
+  <!-- Offline Network Alert Banner -->
+  <aside id="networkBanner" class="network-banner offline" hidden>
+    <div class="network-banner-inner">
+      <span class="pulse-indicator"></span>
+      <span id="networkBannerText">Chế độ Ngoại tuyến: Thiết bị đang mất mạng. Toàn bộ biên bản kiểm tra được bảo toàn an toàn trong máy!</span>
+    </div>
+  </aside>
+
   <div class="app-shell">
+    <!-- Topbar Header -->
     <header class="topbar">
       <div class="brand">
-        <div class="brand-mark" aria-hidden="true">VKU</div>
-        <div>
-          <p class="eyebrow">KHẢO SÁT THỰC ĐỊA</p>
+        <div class="brand-mark" aria-hidden="true">
+          <span class="mark-vku">VKU</span>
+        </div>
+        <div class="brand-info">
+          <p class="eyebrow">ĐẠI HỌC ĐÀ NẴNG · TRƯỜNG ĐH CNTT & TT VIỆT - HÀN</p>
           <h1>VKU Field Survey</h1>
         </div>
       </div>
-      <div class="connection-area">
-        <span id="statusDot" class="status-dot offline" aria-hidden="true"></span>
-        <span id="statusText">Đang kiểm tra kết nối…</span>
+
+      <div class="topbar-actions">
+        <!-- Platform Badge (Capacitor vs PWA) -->
+        <span id="platformBadge" class="platform-badge" title="Môi trường vận hành">PWA Web</span>
+
+        <!-- Network connection dot -->
+        <div class="connection-area" id="connectionArea" title="Trạng thái kết nối">
+          <span id="statusDot" class="status-dot offline" aria-hidden="true"></span>
+          <span id="statusText">Kiểm tra kết nối…</span>
+        </div>
+
+        <!-- Inspector Profile Pill / Login trigger -->
+        <div id="userProfileArea" class="user-profile-area">
+          <button id="loginModalBtn" type="button" class="btn btn-login-pill">
+            <span class="user-icon">👤</span>
+            <span class="user-name">Đăng nhập</span>
+          </button>
+        </div>
       </div>
     </header>
 
     <main class="main-content">
+      <!-- Hero Banner -->
       <section class="hero-card">
-        <div>
-          <p class="section-kicker">OFFLINE-FIRST</p>
-          <h2>Ghi nhận khảo sát ngay cả khi mất mạng</h2>
-          <p>Dữ liệu được lưu an toàn trên thiết bị trước, sau đó tự đồng bộ lên Google Sheets khi có Internet.</p>
+        <div class="hero-copy">
+          <div class="hero-tag-row">
+            <span class="tag-pill tag-primary">OFFLINE-FIRST ARCHITECTURE</span>
+            <span class="tag-pill tag-accent">KIỂM TRA CƠ SỞ VẬT CHẤT</span>
+          </div>
+          <h2>Hệ thống Giám sát & Khảo sát Hiện trường VKU</h2>
+          <p>
+            Thu thập biên bản kiểm tra cơ sở vật chất, phòng học, thiết bị thực hành và an toàn khuôn viên ngay cả khi không có sóng mạng.
+            Dữ liệu được lưu trữ tự động trong IndexedDB và đồng bộ hóa lên Google Sheets / Drive khi kết nối lại.
+          </p>
         </div>
-        <div class="hero-badge">IndexedDB<br>+ GPS<br>+ Drive</div>
+        <div class="hero-badge">
+          <div class="badge-item"><strong>100%</strong><span>Offline Ready</span></div>
+          <div class="badge-item"><strong>GPS</strong><span>Tọa độ thực địa</span></div>
+          <div class="badge-item"><strong>APK</strong><span>Capacitor Native</span></div>
+        </div>
       </section>
 
+      <!-- Inspection Mode Switcher Tabs -->
+      <div class="mode-switcher-container" role="tablist" aria-label="Chế độ khảo sát">
+        <button id="tabFacilityBtn" type="button" role="tab" aria-selected="true" class="mode-tab active">
+          <span class="tab-icon">🏢</span>
+          <div class="tab-text">
+            <strong>Kiểm tra Cơ sở vật chất VKU</strong>
+            <small>Phòng học, Lab, Thiết bị, PCCC & Điện</small>
+          </div>
+        </button>
+        <button id="tabStudentBtn" type="button" role="tab" aria-selected="false" class="mode-tab">
+          <span class="tab-icon">🎓</span>
+          <div class="tab-text">
+            <strong>Khảo sát Sinh viên & Việc làm</strong>
+            <small>Thông tin hướng nghiệp & Nhu cầu thực tế</small>
+          </div>
+        </button>
+      </div>
+
+      <!-- Main Inspection Form Card -->
       <section class="card" aria-labelledby="survey-title">
         <div class="section-heading">
           <div>
-            <p class="section-kicker">01 · PHIÊN KHẢO SÁT</p>
-            <h2 id="survey-title">Thông tin khảo sát</h2>
+            <p class="section-kicker" id="formKicker">01 · BIÊN BẢN KIỂM TRA</p>
+            <h2 id="survey-title">Thông tin Phiên Giám sát Hiện trường</h2>
           </div>
-          <span id="requiredHint" class="muted">* Trường bắt buộc</span>
+          <div class="heading-controls">
+            <span id="requiredHint" class="muted">* Trường bắt buộc</span>
+            <button id="quickFillBtn" type="button" class="btn btn-ghost btn-small" title="Điền mẫu kiểm tra nhanh để thử nghiệm">
+              ⚡ Điền mẫu nhanh
+            </button>
+          </div>
         </div>
 
         <form id="surveyForm" novalidate>
+          <!-- Section 1: Session & Inspector info -->
           <div class="form-grid two-col">
             <div class="field">
-              <label for="sessionName">Tên phiên khảo sát <span>*</span></label>
-              <input id="sessionName" name="sessionName" required maxlength="120" placeholder="Ví dụ: Khảo sát sinh viên năm 3">
+              <label for="sessionName">Tên đợt kiểm tra / Phiên khảo sát <span>*</span></label>
+              <input id="sessionName" name="sessionName" required maxlength="120" placeholder="Ví dụ: Kiểm tra Cơ sở vật chất Tòa V & K - Quý 4">
               <small class="field-error" data-error-for="sessionName"></small>
             </div>
             <div class="field">
-              <label for="interviewerName">Người phỏng vấn <span>*</span></label>
-              <input id="interviewerName" name="interviewerName" required maxlength="120" placeholder="Họ và tên người phỏng vấn">
+              <label for="interviewerName">Cán bộ kiểm tra / Người thực hiện <span>*</span></label>
+              <input id="interviewerName" name="interviewerName" required maxlength="120" placeholder="Họ và tên cán bộ kiểm tra">
               <small class="field-error" data-error-for="interviewerName"></small>
             </div>
             <div class="field">
-              <label for="sessionTime">Thời gian khảo sát <span>*</span></label>
+              <label for="sessionTime">Thời gian kiểm tra <span>*</span></label>
               <input id="sessionTime" name="sessionTime" type="datetime-local" required>
               <small class="field-error" data-error-for="sessionTime"></small>
             </div>
-          </div>
-
-          <div class="divider"></div>
-          <div class="section-heading compact">
-            <div>
-              <p class="section-kicker">02 · SINH VIÊN</p>
-              <h3>Thông tin người được khảo sát</h3>
-            </div>
-          </div>
-
-          <div class="form-grid two-col">
             <div class="field">
-              <label for="studentName">Tên sinh viên <span>*</span></label>
-              <input id="studentName" name="studentName" required maxlength="120" autocomplete="name">
-              <small class="field-error" data-error-for="studentName"></small>
-            </div>
-            <div class="field">
-              <label for="studentClass">Lớp / Khoa <span>*</span></label>
-              <input id="studentClass" name="studentClass" required maxlength="120" placeholder="Ví dụ: 23IT1 · Công nghệ thông tin">
-              <small class="field-error" data-error-for="studentClass"></small>
-            </div>
-            <div class="field">
-              <label for="studentYear">Năm học <span>*</span></label>
-              <select id="studentYear" name="studentYear" required>
-                <option value="">Chọn năm học</option>
-                <option value="Năm 1">Năm 1</option>
-                <option value="Năm 2">Năm 2</option>
-                <option value="Năm 3">Năm 3</option>
-                <option value="Năm 4">Năm 4</option>
-                <option value="Khác">Khác</option>
-              </select>
-              <small class="field-error" data-error-for="studentYear"></small>
+              <label for="departmentUnit">Đơn vị / Phòng ban phụ trách</label>
+              <input id="departmentUnit" name="departmentUnit" placeholder="Phòng Quản trị Thiết bị & CSVC" value="Phòng Quản trị Thiết bị & CSVC">
             </div>
           </div>
 
-          <div class="divider"></div>
-          <div class="section-heading compact">
-            <div>
-              <p class="section-kicker">03 · NHU CẦU VIỆC LÀM</p>
-              <h3>Thông tin định hướng nghề nghiệp</h3>
-            </div>
-          </div>
-
-          <div class="form-grid one-col">
-            <fieldset class="choice-group">
-              <legend>Đang làm thêm <span>*</span></legend>
-              <div class="choice-grid two">
-                <label class="choice"><input type="radio" name="q_working" value="Có" required><span>Có</span></label>
-                <label class="choice"><input type="radio" name="q_working" value="Không"><span>Không</span></label>
+          <!-- Section 2: Facility details (Default Mode) -->
+          <div id="facilityFieldsContainer">
+            <div class="divider"></div>
+            <div class="section-heading compact">
+              <div>
+                <p class="section-kicker">02 · ĐỊA ĐIỂM & CƠ SỞ VẬT CHẤT VKU</p>
+                <h3>Vị trí khuôn viên & Thiết bị kiểm tra</h3>
               </div>
-              <small class="field-error" data-error-for="q_working"></small>
-            </fieldset>
+            </div>
 
-            <fieldset class="choice-group">
-              <legend>Nhu cầu tìm việc <span>*</span></legend>
-              <div class="choice-grid three">
-                <label class="choice"><input type="radio" name="q_needJob" value="Có, cần tìm ngay" required><span>Cần tìm ngay</span></label>
-                <label class="choice"><input type="radio" name="q_needJob" value="Có, tìm khi phù hợp"><span>Tìm khi phù hợp</span></label>
-                <label class="choice"><input type="radio" name="q_needJob" value="Chưa có nhu cầu"><span>Chưa có nhu cầu</span></label>
+            <div class="form-grid two-col">
+              <div class="field">
+                <label for="facilityBuilding">Tòa nhà / Khuôn viên VKU <span>*</span></label>
+                <select id="facilityBuilding" name="facilityBuilding" required>
+                  <option value="">-- Chọn tòa nhà / khu vực --</option>
+                  <option value="Tòa V - Tòa nhà Hành chính & Hội trường">Tòa V · Nhà Hành chính & Hội trường lớn</option>
+                  <option value="Tòa K - Giảng đường Công nghệ & Trung tâm Máy tính" selected>Tòa K · Giảng đường CNTT & Lab máy tính</option>
+                  <option value="Tòa A - Khu Giảng đường Lý thuyết A">Tòa A · Khu Giảng đường Lý thuyết A</option>
+                  <option value="Tòa B - Khu Giảng đường Lý thuyết B">Tòa B · Khu Giảng đường Lý thuyết B</option>
+                  <option value="Thư viện số & Không gian Sáng tạo">Thư viện số & Không gian Sáng tạo</option>
+                  <option value="Khu Ký túc xá (KTX 1 & KTX 2)">Khu Ký túc xá sinh viên KTX 1 & 2</option>
+                  <option value="Trung tâm Thể thao & Nhà thi đấu đa năng">Trung tâm Thể thao & Nhà thi đấu</option>
+                  <option value="Nhà xe sinh viên & Căn-tin trung tâm">Nhà xe sinh viên & Căn-tin trung tâm</option>
+                  <option value="Hạ tầng kỹ thuật & Sân trường chung">Hạ tầng kỹ thuật & Sân trường chung</option>
+                </select>
+                <small class="field-error" data-error-for="facilityBuilding"></small>
               </div>
-              <small class="field-error" data-error-for="q_needJob"></small>
-            </fieldset>
 
-            <div class="field">
-              <label for="q_industry">Ngành mong muốn <span>*</span></label>
-              <select id="q_industry" name="q_industry" required>
-                <option value="">Chọn ngành / vị trí quan tâm</option>
-                <option value="Phát triển phần mềm">Phát triển phần mềm</option>
-                <option value="Data / AI">Data / AI</option>
-                <option value="An toàn thông tin">An toàn thông tin</option>
-                <option value="Mạng / Hệ thống">Mạng / Hệ thống</option>
-                <option value="Thiết kế UI/UX">Thiết kế UI/UX</option>
-                <option value="Digital Marketing">Digital Marketing</option>
-                <option value="Kinh doanh / Bán hàng">Kinh doanh / Bán hàng</option>
-                <option value="Khác">Khác</option>
-              </select>
-              <small class="field-error" data-error-for="q_industry"></small>
+              <div class="field">
+                <label for="facilityRoom">Mã phòng / Vị trí chi tiết <span>*</span></label>
+                <input id="facilityRoom" name="facilityRoom" required maxlength="120" placeholder="Ví dụ: K.A201 - Phòng Thực hành AI & IoT" value="K.A201 - Phòng Lab AI & IoT">
+                <small class="field-error" data-error-for="facilityRoom"></small>
+              </div>
+
+              <div class="field">
+                <label for="facilityCategory">Hạng mục cơ sở vật chất <span>*</span></label>
+                <select id="facilityCategory" name="facilityCategory" required>
+                  <option value="">-- Chọn hạng mục kiểm tra --</option>
+                  <option value="Thiết bị CNTT, Máy tính Lab & Switch" selected>Thiết bị CNTT, Máy tính Lab, Switch & Máy chiếu</option>
+                  <option value="Hệ thống Điều hòa & Quạt thông gió">Hệ thống Điều hòa & Quạt thông gió</option>
+                  <option value="Điện chiếu sáng, Bảng điện & Ổ cắm">Điện chiếu sáng, Bảng điện & Ổ cắm</option>
+                  <option value="Bàn ghế, Bục giảng & Bảng trượt">Bàn ghế sinh viên, Bục giảng & Bảng trượt</option>
+                  <option value="An toàn PCCC & Lối thoát nạn">An toàn PCCC & Bình chữa cháy, Lối thoát hiểm</option>
+                  <option value="Cấp thoát nước & Vệ sinh công cộng">Cấp thoát nước & Nhà vệ sinh</option>
+                  <option value="Kết cấu xây dựng, Tường trần & Cửa kính">Kết cấu xây dựng, Tường trần & Cửa kính</option>
+                  <option value="Mạng Wifi Campus & Hạ tầng viễn thông">Mạng Wifi Campus & Hạ tầng viễn thông</option>
+                  <option value="Hạng mục khác">Hạng mục khác</option>
+                </select>
+                <small class="field-error" data-error-for="facilityCategory"></small>
+              </div>
+
+              <div class="field">
+                <label for="facilityRepairCost">Dự toán kinh phí khắc phục sơ bộ <span>*</span></label>
+                <select id="facilityRepairCost" name="facilityRepairCost" required>
+                  <option value="Dưới 1 triệu VNĐ">Dưới 1 triệu VNĐ (Sửa chữa nhỏ)</option>
+                  <option value="1 - 3 triệu VNĐ">1 - 3 triệu VNĐ (Thay thế linh kiện)</option>
+                  <option value="3 - 5 triệu VNĐ" selected>3 - 5 triệu VNĐ (Bảo dưỡng thiết bị chính)</option>
+                  <option value="5 - 10 triệu VNĐ">5 - 10 triệu VNĐ (Sửa chữa lớn)</option>
+                  <option value="Trên 10 triệu VNĐ">Trên 10 triệu VNĐ (Đầu tư thay mới)</option>
+                  <option value="Chưa phát sinh kinh phí">Chưa phát sinh kinh phí (Hoạt động tốt)</option>
+                </select>
+                <small class="field-error" data-error-for="facilityRepairCost"></small>
+              </div>
             </div>
 
-            <div class="field">
-              <label for="q_salary">Mức lương mong muốn <span>*</span></label>
-              <select id="q_salary" name="q_salary" required>
-                <option value="">Chọn mức lương</option>
-                <option value="Dưới 3 triệu">Dưới 3 triệu</option>
-                <option value="3 - dưới 5 triệu">3 - dưới 5 triệu</option>
-                <option value="5 - dưới 8 triệu">5 - dưới 8 triệu</option>
-                <option value="8 - dưới 12 triệu">8 - dưới 12 triệu</option>
-                <option value="Từ 12 triệu trở lên">Từ 12 triệu trở lên</option>
-                <option value="Chưa xác định">Chưa xác định</option>
-              </select>
-              <small class="field-error" data-error-for="q_salary"></small>
+            <div class="divider"></div>
+            <div class="section-heading compact">
+              <div>
+                <p class="section-kicker">03 · ĐÁNH GIÁ HIỆN TRẠNG KỸ THUẬT</p>
+                <h3>Tình trạng vận hành & Mức độ khẩn cấp</h3>
+              </div>
             </div>
 
-            <div class="field">
-              <label for="q_skillGap">Kỹ năng còn thiếu</label>
-              <textarea id="q_skillGap" name="q_skillGap" maxlength="1000" rows="3" placeholder="Ví dụ: giao tiếp, phỏng vấn, Git, tiếng Anh…"></textarea>
-            </div>
+            <div class="form-grid one-col">
+              <fieldset class="choice-group">
+                <legend>Đánh giá hiện trạng hoạt động <span>*</span></legend>
+                <div class="choice-grid four">
+                  <label class="choice choice-good">
+                    <input type="radio" name="facilityStatus" value="Hoạt động tốt">
+                    <span class="choice-badge">🟢 Hoạt động tốt</span>
+                  </label>
+                  <label class="choice choice-warn">
+                    <input type="radio" name="facilityStatus" value="Cần bảo trì định kỳ">
+                    <span class="choice-badge">🟡 Cần bảo trì</span>
+                  </label>
+                  <label class="choice choice-defect" checked>
+                    <input type="radio" name="facilityStatus" value="Hư hỏng nhẹ" checked>
+                    <span class="choice-badge">🟠 Hư hỏng nhẹ</span>
+                  </label>
+                  <label class="choice choice-danger">
+                    <input type="radio" name="facilityStatus" value="Hỏng nặng / Mất an toàn">
+                    <span class="choice-badge">🔴 Mất an toàn / Hỏng nặng</span>
+                  </label>
+                </div>
+                <small class="field-error" data-error-for="facilityStatus"></small>
+              </fieldset>
 
-            <div class="field">
-              <label for="q_support">Đề xuất hỗ trợ</label>
-              <textarea id="q_support" name="q_support" maxlength="1000" rows="3" placeholder="Sinh viên mong muốn VKU / doanh nghiệp hỗ trợ gì?"></textarea>
-            </div>
+              <fieldset class="choice-group">
+                <legend>Mức độ ưu tiên xử lý <span>*</span></legend>
+                <div class="choice-grid four">
+                  <label class="choice">
+                    <input type="radio" name="facilityPriority" value="P1 - Khẩn cấp (2-4h)">
+                    <span><strong>P1 · Khẩn cấp</strong> (2-4h)</span>
+                  </label>
+                  <label class="choice">
+                    <input type="radio" name="facilityPriority" value="P2 - Ưu tiên cao (24h)" checked>
+                    <span><strong>P2 · Ưu tiên cao</strong> (24h)</span>
+                  </label>
+                  <label class="choice">
+                    <input type="radio" name="facilityPriority" value="P3 - Bình thường (Trong tuần)">
+                    <span><strong>P3 · Bình thường</strong></span>
+                  </label>
+                  <label class="choice">
+                    <input type="radio" name="facilityPriority" value="P4 - Thấp (Định kỳ)">
+                    <span><strong>P4 · Thấp</strong></span>
+                  </label>
+                </div>
+                <small class="field-error" data-error-for="facilityPriority"></small>
+              </fieldset>
 
-            <div class="field">
-              <label for="q_note">Ghi chú</label>
-              <textarea id="q_note" name="q_note" maxlength="1500" rows="3" placeholder="Thông tin bổ sung…"></textarea>
+              <div class="field">
+                <label for="defectDescription">Mô tả hiện trạng sự cố & Khiếm khuyết kỹ thuật</label>
+                <textarea id="defectDescription" name="defectDescription" maxlength="1000" rows="3" placeholder="Mô tả cụ thể sự cố (ví dụ: Máy chiếu Panasonic hình ảnh bị nhòe vàng, quạt trần số 2 phát tiếng ồn lớn, ổ cắm bàn 4 mất tiếp xúc điện...)."></textarea>
+              </div>
+
+              <div class="field">
+                <label for="proposedSolution">Biện pháp khắc phục đề xuất & Vật tư cần thiết</label>
+                <textarea id="proposedSolution" name="proposedSolution" maxlength="1000" rows="3" placeholder="Đề xuất phương án (ví dụ: Thay bóng đèn máy chiếu, thay tụ quạt trần, thay cụm ổ cắm Sino âm tường...)."></textarea>
+              </div>
+
+              <div class="field">
+                <label for="facilityNotes">Ghi chú bổ sung của Cán bộ kiểm tra</label>
+                <textarea id="facilityNotes" name="facilityNotes" maxlength="1500" rows="2" placeholder="Thông tin bổ sung, yêu cầu phối hợp giữa các đơn vị..."></textarea>
+              </div>
             </div>
           </div>
 
+          <!-- Section 2B: Student survey fields (Shown when Student Tab is active) -->
+          <div id="studentFieldsContainer" hidden>
+            <div class="divider"></div>
+            <div class="section-heading compact">
+              <div>
+                <p class="section-kicker">02 · SINH VIÊN</p>
+                <h3>Thông tin người được khảo sát</h3>
+              </div>
+            </div>
+
+            <div class="form-grid two-col">
+              <div class="field">
+                <label for="studentName">Tên sinh viên <span>*</span></label>
+                <input id="studentName" name="studentName" maxlength="120" placeholder="Nguyễn Văn A" autocomplete="name">
+                <small class="field-error" data-error-for="studentName"></small>
+              </div>
+              <div class="field">
+                <label for="studentClass">Lớp / Khoa <span>*</span></label>
+                <input id="studentClass" name="studentClass" maxlength="120" placeholder="23IT1 · Khoa Khoa học máy tính">
+                <small class="field-error" data-error-for="studentClass"></small>
+              </div>
+              <div class="field">
+                <label for="studentYear">Năm học <span>*</span></label>
+                <select id="studentYear" name="studentYear">
+                  <option value="">Chọn năm học</option>
+                  <option value="Năm 1">Năm 1</option>
+                  <option value="Năm 2">Năm 2</option>
+                  <option value="Năm 3">Năm 3</option>
+                  <option value="Năm 4">Năm 4</option>
+                  <option value="Khác">Khác</option>
+                </select>
+                <small class="field-error" data-error-for="studentYear"></small>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="section-heading compact">
+              <div>
+                <p class="section-kicker">03 · ĐỊNH HƯỚNG NGHỀ NGHIỆP</p>
+                <h3>Nhu cầu việc làm & kỹ năng</h3>
+              </div>
+            </div>
+
+            <div class="form-grid one-col">
+              <fieldset class="choice-group">
+                <legend>Đang làm thêm <span>*</span></legend>
+                <div class="choice-grid two">
+                  <label class="choice"><input type="radio" name="q_working" value="Có"><span>Có</span></label>
+                  <label class="choice"><input type="radio" name="q_working" value="Không" checked><span>Không</span></label>
+                </div>
+                <small class="field-error" data-error-for="q_working"></small>
+              </fieldset>
+
+              <fieldset class="choice-group">
+                <legend>Nhu cầu tìm việc <span>*</span></legend>
+                <div class="choice-grid three">
+                  <label class="choice"><input type="radio" name="q_needJob" value="Có, cần tìm ngay"><span>Cần tìm ngay</span></label>
+                  <label class="choice"><input type="radio" name="q_needJob" value="Có, tìm khi phù hợp" checked><span>Tìm khi phù hợp</span></label>
+                  <label class="choice"><input type="radio" name="q_needJob" value="Chưa có nhu cầu"><span>Chưa có nhu cầu</span></label>
+                </div>
+                <small class="field-error" data-error-for="q_needJob"></small>
+              </fieldset>
+
+              <div class="form-grid two-col">
+                <div class="field">
+                  <label for="q_industry">Ngành mong muốn <span>*</span></label>
+                  <select id="q_industry" name="q_industry">
+                    <option value="Phát triển phần mềm">Phát triển phần mềm</option>
+                    <option value="Data / AI">Data / AI</option>
+                    <option value="An toàn thông tin">An toàn thông tin</option>
+                    <option value="Mạng / Hệ thống">Mạng / Hệ thống</option>
+                    <option value="Thiết kế UI/UX">Thiết kế UI/UX</option>
+                    <option value="Digital Marketing">Digital Marketing</option>
+                    <option value="Kinh doanh / Bán hàng">Kinh doanh / Bán hàng</option>
+                    <option value="Khác">Khác</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="q_salary">Mức lương mong muốn <span>*</span></label>
+                  <select id="q_salary" name="q_salary">
+                    <option value="Dưới 3 triệu">Dưới 3 triệu</option>
+                    <option value="3 - dưới 5 triệu">3 - dưới 5 triệu</option>
+                    <option value="5 - dưới 8 triệu" selected>5 - dưới 8 triệu</option>
+                    <option value="8 - dưới 12 triệu">8 - dưới 12 triệu</option>
+                    <option value="Từ 12 triệu trở lên">Từ 12 triệu trở lên</option>
+                    <option value="Chưa xác định">Chưa xác định</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="q_skillGap">Kỹ năng còn thiếu</label>
+                <textarea id="q_skillGap" name="q_skillGap" maxlength="1000" rows="2" placeholder="Ví dụ: Ngoại ngữ, kỹ năng phỏng vấn, Git..."></textarea>
+              </div>
+              <div class="field">
+                <label for="q_support">Đề xuất hỗ trợ</label>
+                <textarea id="q_support" name="q_support" maxlength="1000" rows="2" placeholder="Sinh viên mong muốn VKU / doanh nghiệp hỗ trợ gì?"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4: Field Evidence (GPS, Camera Watermark & Signature) -->
           <div class="divider"></div>
           <div class="section-heading compact">
             <div>
-              <p class="section-kicker">04 · HIỆN TRƯỜNG</p>
-              <h3>GPS và ảnh khảo sát</h3>
+              <p class="section-kicker">04 · MINH CHỨNG THỰC ĐỊA</p>
+              <h3>GPS, Ảnh hiện trường đóng dấu & Chữ ký xác nhận</h3>
             </div>
           </div>
 
+          <!-- GPS Location Card -->
           <div class="location-card">
             <div class="location-copy">
-              <div class="icon-box">⌖</div>
-              <div>
-                <strong>Vị trí hiện tại</strong>
-                <p id="locationStatus" class="muted">Chưa lấy vị trí.</p>
+              <div class="icon-box" aria-hidden="true">📍</div>
+              <div class="location-details">
+                <strong>Tọa độ GPS Hiện trường</strong>
+                <p id="locationStatus" class="muted">Chưa lấy vị trí thực địa.</p>
+                <div id="vkuDistanceBadge" class="vku-distance-badge" hidden></div>
               </div>
             </div>
-            <button id="getLocationBtn" type="button" class="btn btn-secondary">Lấy vị trí hiện tại</button>
+            <button id="getLocationBtn" type="button" class="btn btn-secondary">
+              ⌖ Lấy vị trí GPS hiện tại
+            </button>
           </div>
           <input id="latitude" name="latitude" type="hidden">
           <input id="longitude" name="longitude" type="hidden">
-          <a id="mapsLink" class="maps-link" href="#" target="_blank" rel="noopener" hidden>Mở vị trí trên Google Maps ↗</a>
+          <div class="maps-link-wrapper">
+            <a id="mapsLink" class="maps-link" href="#" target="_blank" rel="noopener" hidden>
+              🗺️ Mở vị trí trên Google Maps ↗
+            </a>
+          </div>
           <small class="field-error block-error" data-error-for="location"></small>
 
+          <!-- Photo Capture Card with Watermarking -->
           <div class="photo-card">
             <div class="photo-heading">
               <div>
-                <strong>Ảnh hiện trường <span>*</span></strong>
-                <p class="muted">Ảnh sẽ được nén trước khi lưu và đồng bộ.</p>
+                <strong>Ảnh Hiện trường Minh chứng <span>*</span></strong>
+                <p class="muted">Ảnh được tự động nén & đóng dấu Watermark (Thời gian + Tọa độ GPS + Mã phòng).</p>
               </div>
               <span id="photoStatus" class="photo-status">Chưa có ảnh</span>
             </div>
             <div class="photo-actions">
-              <button id="takePhotoBtn" type="button" class="btn btn-secondary">Chụp / chọn ảnh</button>
+              <button id="takePhotoBtn" type="button" class="btn btn-secondary">
+                📷 Chụp / Chọn ảnh hiện trường
+              </button>
               <input id="photoInput" type="file" accept="image/*" capture="environment" hidden>
+              <button id="clearPhotoBtn" type="button" class="btn btn-ghost btn-small" hidden>Xóa ảnh</button>
             </div>
-            <img id="photoPreview" class="photo-preview" alt="Ảnh xem trước" hidden>
+            <div class="preview-container">
+              <img id="photoPreview" class="photo-preview" alt="Ảnh xem trước minh chứng hiện trường" hidden>
+              <div id="photoWatermarkTag" class="photo-watermark-tag" hidden></div>
+            </div>
             <small class="field-error block-error" data-error-for="photo"></small>
           </div>
 
+          <!-- Digital Signature Pad Card -->
+          <div class="signature-card">
+            <div class="signature-heading">
+              <div>
+                <strong>Chữ ký Điện tử Cán bộ Kiểm tra <span>*</span></strong>
+                <p class="muted">Ký xác nhận trực tiếp bằng ngón tay hoặc bút cảm ứng trên màn hình.</p>
+              </div>
+              <button id="clearSignatureBtn" type="button" class="btn btn-ghost btn-small">Xóa chữ ký</button>
+            </div>
+            <div class="signature-canvas-wrapper">
+              <canvas id="signatureCanvas" width="600" height="180"></canvas>
+              <div id="signaturePlaceholder" class="signature-placeholder">
+                ✍️ Ký tên tại đây
+              </div>
+            </div>
+            <small class="field-error block-error" data-error-for="signature"></small>
+          </div>
+
+          <!-- Form Submit Action Bar -->
           <div class="submit-area">
             <div class="submit-copy">
-              <strong>Dữ liệu được lưu trước, đồng bộ sau.</strong>
-              <span>Không có Internet vẫn có thể gửi khảo sát.</span>
+              <strong>Offline-First: Lưu trữ an toàn trước, đồng bộ sau.</strong>
+              <span>Không có Internet vẫn gửi bình thường. Dữ liệu bảo đảm 100% không mất mát.</span>
             </div>
             <div class="action-row">
-              <button id="resetBtn" type="button" class="btn btn-ghost">Xóa biểu mẫu</button>
-              <button id="submitBtn" type="submit" class="btn btn-primary">Gửi phiên khảo sát</button>
+              <button id="resetBtn" type="button" class="btn btn-ghost">Làm mới biểu mẫu</button>
+              <button id="submitBtn" type="submit" class="btn btn-primary">
+                💾 Gửi & Lưu biên bản kiểm tra
+              </button>
             </div>
           </div>
         </form>
       </section>
 
+      <!-- Sync & Stored Records Management Section -->
       <section class="card" aria-labelledby="sync-title">
         <div class="section-heading">
           <div>
-            <p class="section-kicker">05 · ĐỒNG BỘ</p>
-            <h2 id="sync-title">Phiên đã lưu trên máy</h2>
+            <p class="section-kicker">05 · QUẢN LÝ DỮ LIỆU CỤC BỘ</p>
+            <h2 id="sync-title">Biên bản đã lưu trên thiết bị (IndexedDB)</h2>
           </div>
-          <button id="syncNowBtn" type="button" class="btn btn-small btn-secondary" hidden>Đồng bộ ngay</button>
+          <div class="heading-actions">
+            <button id="syncNowBtn" type="button" class="btn btn-small btn-primary">
+              🔄 Đồng bộ tất cả ngay
+            </button>
+          </div>
         </div>
+
+        <!-- Sync Stats Cards -->
         <div class="stats-grid">
-          <div class="stat"><span id="syncedCount">0</span><small>Đã đồng bộ</small></div>
-          <div class="stat"><span id="pendingCount">0</span><small>Chờ đồng bộ</small></div>
-          <div class="stat"><span id="errorCount">0</span><small>Lỗi</small></div>
+          <div class="stat stat-synced">
+            <span id="syncedCount">0</span>
+            <small>Đã đồng bộ Cloud</small>
+          </div>
+          <div class="stat stat-pending">
+            <span id="pendingCount">0</span>
+            <small>Chờ đồng bộ (Offline)</small>
+          </div>
+          <div class="stat stat-error">
+            <span id="errorCount">0</span>
+            <small>Lỗi cần thử lại</small>
+          </div>
+          <div class="stat stat-total">
+            <span id="totalCount">0</span>
+            <small>Tổng biên bản</small>
+          </div>
         </div>
+
+        <!-- Toolbar: Filters & Data Export -->
         <div class="list-toolbar">
-          <p id="pendingBadge" class="pending-badge" hidden></p>
-          <button id="exportBtn" type="button" class="btn btn-ghost btn-small">Xuất JSON</button>
+          <div class="filter-pills" role="tablist">
+            <button id="filterAllBtn" type="button" class="filter-pill active">Tất cả</button>
+            <button id="filterPendingBtn" type="button" class="filter-pill">Chờ gửi</button>
+            <button id="filterSyncedBtn" type="button" class="filter-pill">Đã đồng bộ</button>
+            <button id="filterUrgentBtn" type="button" class="filter-pill">Khẩn cấp (P1/P2)</button>
+          </div>
+          <div class="export-actions">
+            <button id="exportCsvBtn" type="button" class="btn btn-ghost btn-small" title="Xuất dữ liệu Excel / CSV">
+              📊 Xuất CSV
+            </button>
+            <button id="exportBtn" type="button" class="btn btn-ghost btn-small" title="Xuất file JSON sao lưu">
+              💾 Xuất JSON
+            </button>
+          </div>
         </div>
+
+        <!-- Search Bar -->
+        <div class="search-box">
+          <input id="searchInput" type="search" placeholder="🔍 Tìm kiếm theo mã phòng, tòa nhà, người kiểm tra...">
+        </div>
+
+        <!-- Records List -->
         <div id="sessionList" class="session-list" aria-live="polite"></div>
       </section>
     </main>
 
+    <!-- Footer -->
     <footer class="footer">
-      <span>VKU Field Survey</span>
-      <span>Offline-first · IndexedDB · Google Sheets</span>
+      <div class="footer-copy">
+        <strong>VKU Field Survey — Mini-Project 1</strong>
+        <span>Trường Đại học Công nghệ Thông tin và Truyền thông Việt - Hàn · ĐH Đà Nẵng</span>
+      </div>
+      <div class="footer-links">
+        <a href="report.html" target="_blank" class="footer-link">📄 Báo cáo Kỹ thuật (Technical Report)</a>
+        <span>·</span>
+        <span>Capacitor Android & PWA v2.2</span>
+      </div>
     </footer>
   </div>
 
+  <!-- Toast Notification -->
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Detail Inspection Modal -->
   <div id="detailModal" class="modal-backdrop" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
       <div class="modal-header">
-        <h3 id="detailTitle">Chi tiết phiên khảo sát</h3>
+        <div class="modal-header-titles">
+          <p class="section-kicker">CHI TIẾT BIÊN BẢN HIỆN TRƯỜNG</p>
+          <h3 id="detailTitle">Biên bản Kiểm tra Cơ sở vật chất</h3>
+        </div>
         <button id="closeModalBtn" type="button" class="icon-button" aria-label="Đóng">×</button>
       </div>
       <div id="detailContent" class="detail-content"></div>
       <div class="modal-actions">
+        <button id="printInspectionSlipBtn" type="button" class="btn btn-secondary">
+          🖨️ In Biên bản / Xuất PDF
+        </button>
         <button id="deleteDetailBtn" type="button" class="btn btn-danger">Xóa khỏi máy</button>
-        <button id="retryDetailBtn" type="button" class="btn btn-secondary" hidden>Thử đồng bộ lại</button>
+        <button id="retryDetailBtn" type="button" class="btn btn-primary" hidden>Thử đồng bộ lại</button>
         <button id="closeModalBtn2" type="button" class="btn btn-ghost">Đóng</button>
       </div>
     </div>
   </div>
 
+  <!-- Inspector Login Modal ("thêm trang đăng nhập các kiểu") -->
+  <div id="loginModal" class="modal-backdrop" hidden>
+    <div class="modal modal-login" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+      <div class="modal-header">
+        <div class="brand-modal">
+          <span class="brand-mark small">VKU</span>
+          <div>
+            <p class="section-kicker">CÁN BỘ KIỂM TRA THỰC ĐỊA</p>
+            <h3 id="loginTitle">Đăng nhập Hệ thống Giám sát</h3>
+          </div>
+        </div>
+        <button id="closeLoginModalBtn" type="button" class="icon-button" aria-label="Đóng">×</button>
+      </div>
+
+      <div class="login-modal-body">
+        <div class="login-offline-notice">
+          <span>⚡ Hỗ trợ Đăng nhập Ngoại tuyến (Offline Login): Phiên đăng nhập được lưu an toàn trong thiết bị, hoạt động ngay cả khi ở tầng hầm hoặc nơi mất mạng.</span>
+        </div>
+
+        <!-- Login Tabs (Credentials vs Quick PIN) -->
+        <div class="login-tabs">
+          <button id="loginTabCredsBtn" type="button" class="login-tab active">Tài khoản Email</button>
+          <button id="loginTabPinBtn" type="button" class="login-tab">Mã PIN Nhanh</button>
+        </div>
+
+        <!-- Credentials Form -->
+        <form id="loginFormCreds" class="login-form">
+          <div class="field">
+            <label for="loginEmail">Email Cán bộ / Mã Thanh tra <span>*</span></label>
+            <input id="loginEmail" type="email" required placeholder="canbo.csvc@vku.udn.vn" autocomplete="username" value="canbo.csvc@vku.udn.vn">
+          </div>
+          <div class="field">
+            <label for="loginPassword">Mật khẩu <span>*</span></label>
+            <input id="loginPassword" type="password" required placeholder="••••••••" autocomplete="current-password" value="vku2026@pass">
+          </div>
+          <div class="login-options">
+            <label class="remember-label">
+              <input type="checkbox" id="rememberMeCheckbox" checked>
+              <span>Ghi nhớ phiên làm việc trên thiết bị này</span>
+            </label>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">
+            Đăng nhập Hệ thống
+          </button>
+        </form>
+
+        <!-- PIN Form -->
+        <form id="loginFormPin" class="login-form" hidden>
+          <div class="pin-instructions">
+            Nhập mã PIN 4 chữ số của cán bộ kiểm tra để truy cập nhanh ngoài hiện trường:
+          </div>
+          <div class="pin-inputs">
+            <input id="pin1" class="pin-digit" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            <input id="pin2" class="pin-digit" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            <input id="pin3" class="pin-digit" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            <input id="pin4" class="pin-digit" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">
+            Xác nhận mã PIN
+          </button>
+        </form>
+
+        <!-- Quick Demo Accounts for Evaluators / Teachers -->
+        <div class="demo-accounts-section">
+          <p class="section-kicker">CHỌN TÀI KHOẢN MẪU ĐỂ TEST NHANH</p>
+          <div class="demo-accounts-grid">
+            <button type="button" class="demo-acc-btn" data-email="canbo.csvc@vku.udn.vn" data-name="ThS. Nguyễn Văn An" data-dept="Phòng Quản trị Thiết bị & CSVC" data-role="Cán bộ Giám sát">
+              <strong>ThS. Nguyễn Văn An</strong>
+              <small>Phòng Quản trị Thiết bị & CSVC (PIN: 1234)</small>
+            </button>
+            <button type="button" class="demo-acc-btn" data-email="kythuat.lab@vku.udn.vn" data-name="KS. Trần Thị Mai" data-dept="Trung tâm Quản trị Mạng & Lab IT" data-role="Kỹ thuật viên Lab">
+              <strong>KS. Trần Thị Mai</strong>
+              <small>Trung tâm Quản trị Mạng & Lab IT (PIN: 1234)</small>
+            </button>
+            <button type="button" class="demo-acc-btn" data-email="thanhtra.pccc@vku.udn.vn" data-name="ThS. Lê Hoàng Nam" data-dept="Ban Thanh tra & An toàn PCCC" data-role="Thanh tra An toàn">
+              <strong>ThS. Lê Hoàng Nam</strong>
+              <small>Ban Thanh tra & An toàn PCCC (PIN: 1234)</small>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Profile Drawer / Session Modal (When logged in) -->
+  <div id="profileModal" class="modal-backdrop" hidden>
+    <div class="modal modal-profile" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+      <div class="modal-header">
+        <h3 id="profileTitle">Hồ sơ Cán bộ Kiểm tra</h3>
+        <button id="closeProfileModalBtn" type="button" class="icon-button" aria-label="Đóng">×</button>
+      </div>
+      <div class="profile-modal-body">
+        <div class="profile-avatar-row">
+          <div id="profileAvatarLarge" class="profile-avatar-large">NA</div>
+          <div>
+            <h4 id="profileFullName">ThS. Nguyễn Văn An</h4>
+            <p id="profileEmail" class="muted">canbo.csvc@vku.udn.vn</p>
+            <span id="profileRoleBadge" class="badge synced">Cán bộ Giám sát</span>
+          </div>
+        </div>
+        <div class="profile-details-list">
+          <div class="detail-row">
+            <strong>Đơn vị công tác:</strong>
+            <span id="profileDept">Phòng Quản trị Thiết bị & CSVC</span>
+          </div>
+          <div class="detail-row">
+            <strong>Cơ sở làm việc:</strong>
+            <span>Đại học CNTT & TT Việt - Hàn (VKU) · 470 Trần Đại Nghĩa</span>
+          </div>
+          <div class="detail-row">
+            <strong>Trạng thái phiên:</strong>
+            <span>Đã xác thực cục bộ (Offline Session Valid)</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="logoutBtn" type="button" class="btn btn-danger">Đăng xuất</button>
+        <button id="closeProfileBtn2" type="button" class="btn btn-ghost">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Printable Inspection Slip (Hidden on screen, shown in print preview) -->
+  <div id="printInspectionSlipArea" class="print-inspection-slip-area" hidden></div>
+
+  <!-- Scripts -->
   <script type="module" src="app.js"></script>
 </body>
 </html>

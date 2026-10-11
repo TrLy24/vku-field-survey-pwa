@@ -1,10 +1,7 @@
-const CACHE_NAME = "vku-field-survey-v2";
-const APP_SHELL = [
+const CACHE_NAME = "vku-field-survey-v3";
+const PRECACHE_ASSETS = [
   "./",
   "./index.html",
-  "./style.css",
-  "./config.js",
-  "./app.js",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
@@ -12,37 +9,60 @@ const APP_SHELL = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache) => {
+      return Promise.allSettled(
+        PRECACHE_ASSETS.map((url) =>
+          cache.add(url).catch((err) => {
+            console.warn("[SW] Precache skipped for:", url, err);
+          })
+        )
+      );
+    }).then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))))
-      .then(() => self.clients.claim())
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+      );
+    }).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener("fetch", (event) => {
-  const request = event.request;
+  const { request } = event;
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
+  if (!url.protocol.startsWith("http")) return;
   if (url.origin !== self.location.origin) return;
 
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
-      return fetch(request).then((response) => {
-        if (response && response.ok && url.origin === self.location.origin) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
-        }
-        return response;
-      }).catch(() => caches.match("./index.html"));
+    caches.match(request).then((cachedResponse) => {
+      const fetchPromise = fetch(request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseClone).catch(() => {});
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          if (cachedResponse) return cachedResponse;
+          if (request.mode === "navigate") {
+            return caches.match("./index.html");
+          }
+          return new Response("Offline resource unavailable", {
+            status: 503,
+            statusText: "Offline"
+          });
+        });
+
+      return cachedResponse || fetchPromise;
     })
   );
 });
