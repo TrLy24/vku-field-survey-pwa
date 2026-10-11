@@ -1,4 +1,4 @@
-# 🏫 VKU Field Survey PWA — Hệ thống Khảo sát & Giám sát Cơ sở vật chất
+# VKU Field Survey PWA — Hệ thống Khảo sát & Giám sát Cơ sở vật chất
 
 [![PWA](https://img.shields.io/badge/PWA-Offline--First-0054A6?style=flat-square&logo=pwa)](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
 [![Capacitor](https://img.shields.io/badge/Capacitor-Android%20v8.5.2-119EFF?style=flat-square&logo=capacitor)](https://capacitorjs.com/)
@@ -11,7 +11,7 @@
 
 ---
 
-## 📌 1. Giới thiệu Dự án
+## 1. Giới thiệu Dự án
 
 **VKU Field Survey** là giải pháp phần mềm giám sát và kiểm tra cơ sở vật chất (phòng lab thực hành, giảng đường, máy chiếu, điều hòa, hệ thống PCCC, điện chiếu sáng) dành cho cán bộ Đại học Công nghệ Thông tin và Truyền thông Việt - Hàn (VKU) hoạt động hoàn hảo trong điều kiện **hoàn toàn mất kết nối mạng (Zero Network Connectivity)**.
 
@@ -27,14 +27,14 @@
 
 ---
 
-## ✨ 2. Các Tính năng Nổi bật
+## 2. Các Tính năng Nổi bật
 
-### 🏢 Kiểm tra Cơ sở vật chất & Khảo sát Thực địa
+### Kiểm tra Cơ sở vật chất & Khảo sát Thực địa
 - **Khuôn viên VKU:** Hỗ trợ đầy đủ các khu vực: Tòa V (Hành chính), Tòa K (Giảng đường CNTT & Lab máy tính), Tòa A, Tòa B, Thư viện số, Ký túc xá K1/K2, Trung tâm Thể thao, Nhà xe...
 - **Hạng mục chi tiết:** Thiết bị CNTT & Lab, Điều hòa & Quạt, Điện chiếu sáng, Bàn ghế, PCCC, Cấp thoát nước, Kết cấu công trình.
 - **Phân loại hiện trạng & Ưu tiên:** Đánh giá từ Hoạt động tốt đến Nguy cơ mất an toàn; mức độ ưu tiên từ P1 (Khẩn cấp 2-4h) đến P4 (Định kỳ).
 
-### 🔐 Đăng nhập & Xác thực Cán bộ Ngoại tuyến (Offline Auth)
+### Đăng nhập & Xác thực Cán bộ Ngoại tuyến (Offline Auth)
 - Hỗ trợ đăng nhập bằng Email Cán bộ / Mã Thanh tra hoặc **mã PIN 4 chữ số** tiện lợi cho thao tác ngoài hiện trường.
 - Tích hợp sẵn 3 tài khoản Demo một chạm đại diện cho các phòng ban:
   - **ThS. Nguyễn Văn An** — Phòng Quản trị Thiết bị & CSVC (`canbo.csvc@vku.udn.vn`, PIN: `1234`)
@@ -42,29 +42,29 @@
   - **ThS. Lê Hoàng Nam** — Ban Thanh tra & An toàn PCCC (`thanhtra.pccc@vku.udn.vn`, PIN: `1234`)
 - **Phiên làm việc lưu trữ cục bộ (Offline Session Persistence):** Cho phép đăng nhập và sử dụng ngay cả khi bật Chế độ Máy bay (Airplane Mode).
 
-### 📍 Tọa độ GPS & Đo khoảng cách Campus
+### Tọa độ GPS & Đo khoảng cách Campus
 - Định vị vệ tinh thực địa và **đo khoảng cách tự động** tới cổng chính trường VKU (15.9753° N, 108.2523° E) qua công thức Haversine.
 - Liên kết trực tiếp xem vị trí trên Google Maps.
 
-### 📷 Nén ảnh & Đóng dấu Watermark Tự động
+### Nén ảnh & Đóng dấu Watermark Tự động
 - Tự động nén ảnh chụp bằng Canvas API xuống dưới 1.2MB, tiết kiệm băng thông và bộ nhớ.
 - Đóng dấu watermark trực tiếp lên góc ảnh: `[VKU FIELD INSPECTION] | Mã phòng | Thời gian | Tọa độ GPS`.
 
-### ✍️ Chữ ký Điện tử (Digital Signature Pad)
+### Chữ ký Điện tử (Digital Signature Pad)
 - Ký tên trực tiếp bằng ngón tay hoặc bút cảm ứng trên màn hình HTML5 Canvas.
 - Xuất chuỗi chữ ký vector hóa đính kèm biên bản.
 
-### 🖨️ In Biên bản Chuẩn Hành chính / Xuất PDF (Print Slip)
+### In Biên bản Chuẩn Hành chính / Xuất PDF (Print Slip)
 - Tích hợp định dạng `@media print` sẵn sàng in hoặc lưu thành file PDF biên bản kiểm tra cơ sở vật chất trang trọng theo chuẩn văn bản hành chính của Đại học VKU.
 
-### 📱 Đóng gói Android APK qua Capacitor Bridge
+### Đóng gói Android APK qua Capacitor Bridge
 - Đã cấu hình và biên dịch thành công file cài đặt Android Native:  
-  📁 `android/app/build/outputs/apk/debug/app-debug.apk` (8.27 MB).
+ `android/app/build/outputs/apk/debug/app-debug.apk` (8.27 MB).
 - Tích hợp `@capacitor/camera`, `@capacitor/filesystem` và tự động nhận diện nền tảng Native.
 
 ---
 
-## 🚀 3. Cài đặt & Chạy Thử nghiệm
+## 3. Cài đặt & Chạy Thử nghiệm
 
 ### 3.1. Yêu cầu Môi trường
 - Node.js (khuyến nghị v18+)
@@ -88,7 +88,7 @@ Tài nguyên sau khi build sẽ nằm trong thư mục `www/`.
 
 ---
 
-## 📱 4. Đóng gói Ứng dụng Android APK (Capacitor)
+## 4. Đóng gói Ứng dụng Android APK (Capacitor)
 
 Dự án đã thiết lập sẵn toàn bộ cấu hình Gradle và Capacitor trong thư mục `android/`:
 
@@ -198,7 +198,7 @@ Bạn có thể copy file này sang điện thoại Android và cài đặt tr�
 
 ---
 
-## ☁️ 5. Hướng dẫn Triển khai Trực tuyến (Live Deployment)
+## 5. Hướng dẫn Triển khai Trực tuyến (Live Deployment)
 
 ### 5.1. Triển khai lên Vercel
 Dự án đã có sẵn tệp cấu hình `vercel.json` tối ưu cho PWA:
@@ -223,7 +223,7 @@ Hoặc import trực tiếp Git Repository trên dashboard [Vercel](https://verc
 
 ---
 
-## 📊 6. Cấu hình Backend Google Apps Script
+## 6. Cấu hình Backend Google Apps Script
 
 Mã nguồn backend nằm tại thư mục `google-apps-script/Code.gs`:
 1. Mở Google Spreadsheet của bạn và tạo sheet `CSDL`.
@@ -235,14 +235,14 @@ Mã nguồn backend nằm tại thư mục `google-apps-script/Code.gs`:
 
 ---
 
-## 📄 7. Báo cáo Kỹ thuật (Technical Report)
+## 7. Báo cáo Kỹ thuật (Technical Report)
 
 - **Xem trực tuyến & In PDF:** Mở tệp `report.html` trong trình duyệt và nhấn nút **"In Báo Cáo / Xuất PDF"** (chuẩn 3 trang A4).
 - **Xem dạng Markdown:** Tham khảo tệp [TECHNICAL_REPORT.md](file:///c:/Users/fptsh/vku-field-survey-pwa/TECHNICAL_REPORT.md).
 
 ---
 
-## 📁 8. Cấu trúc Thư mục
+## 8. Cấu trúc Thư mục
 
 ```text
 vku-field-survey-pwa/
@@ -267,4 +267,4 @@ vku-field-survey-pwa/
 
 ---
 
-*Phát triển bởi Nhóm Sinh viên Khảo sát Thực địa — Khoa Khoa học Máy tính, Trường Đại học CNTT&TT Việt - Hàn (VKU).*
+**
